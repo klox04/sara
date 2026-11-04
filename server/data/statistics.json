@@ -1,0 +1,26 @@
+[
+  {
+    "id": "stat-start",
+    "sort": 1,
+    "published": true,
+    "value": "2007",
+    "label": "Public service began",
+    "note": "Vice Mayor, Davao City"
+  },
+  {
+    "id": "stat-programs",
+    "sort": 2,
+    "published": true,
+    "value": "7",
+    "label": "Priority areas",
+    "note": "Education through preparedness"
+  },
+  {
+    "id": "stat-role",
+    "sort": 3,
+    "published": true,
+    "value": "2022",
+    "label": "Vice President",
+    "note": "Serving the nation"
+  }
+]

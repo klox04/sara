@@ -1,0 +1,17 @@
+[
+  {
+    "id": "banner-home",
+    "sort": 1,
+    "published": true,
+    "image": "/media/landingpage.JPG",
+    "title": "Sara\nDuterte",
+    "subtitle": "Public Service. Real Change. A Stronger Philippines.",
+    "body": "From Davao to national public service, Sara Duterte has dedicated her life to serving communities, empowering people, and building a better future for every Filipino.",
+    "quote": "Mas malaking bukas para sa bawat Pilipino.",
+    "quoteAuthor": "Sara Duterte",
+    "primaryLabel": "Explore Her Story",
+    "primaryTo": "/stories",
+    "secondaryLabel": "Watch Video",
+    "secondaryTo": ""
+  }
+]

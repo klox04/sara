@@ -1,0 +1,42 @@
+[
+  {
+    "id": "journey-2007",
+    "sort": 1,
+    "published": true,
+    "year": "2007",
+    "role": "Vice Mayor",
+    "place": "Davao City",
+    "text": "Began her journey in elected public service.",
+    "image": "/media/imag1.JPG"
+  },
+  {
+    "id": "journey-2010",
+    "sort": 2,
+    "published": true,
+    "year": "2010",
+    "role": "Mayor",
+    "place": "Davao City (2010–2013)",
+    "text": "Focused on inclusive development and people-centered programs.",
+    "image": "/media/image2.jpg"
+  },
+  {
+    "id": "journey-2016",
+    "sort": 3,
+    "published": true,
+    "year": "2016",
+    "role": "Mayor",
+    "place": "Davao City (2016–2022)",
+    "text": "Expanded programs in education, health, infrastructure, and economic development.",
+    "image": "/media/image3.JPG"
+  },
+  {
+    "id": "journey-2022",
+    "sort": 4,
+    "published": true,
+    "year": "2022",
+    "role": "Vice President",
+    "place": "Republic of the Philippines (2022–Present)",
+    "text": "Continuing to serve Filipinos across the nation.",
+    "image": "/media/IMG_9155.jpg"
+  }
+]

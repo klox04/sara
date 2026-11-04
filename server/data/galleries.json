@@ -1,0 +1,14 @@
+[
+  {
+    "id": "gallery-service",
+    "sort": 1,
+    "published": true,
+    "title": "A life in service",
+    "images": [
+      "/media/imag1.JPG",
+      "/media/image2.jpg",
+      "/media/image3.JPG",
+      "/media/imag4.jpg"
+    ]
+  }
+]

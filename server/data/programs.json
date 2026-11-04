@@ -1,0 +1,58 @@
+[
+  {
+    "id": "program-education",
+    "sort": 1,
+    "published": true,
+    "icon": "boxicons:education",
+    "title": "Education",
+    "text": "More opportunities for every learner"
+  },
+  {
+    "id": "program-health",
+    "sort": 2,
+    "published": true,
+    "icon": "uil:heartbeat",
+    "title": "Health",
+    "text": "Stronger, healthier communities"
+  },
+  {
+    "id": "program-social",
+    "sort": 3,
+    "published": true,
+    "icon": "heroicons:user-group",
+    "title": "Social Services",
+    "text": "A more inclusive society"
+  },
+  {
+    "id": "program-economy",
+    "sort": 4,
+    "published": true,
+    "icon": "bi:bar-chart",
+    "title": "Economy & Jobs",
+    "text": "More livelihoods, stronger communities"
+  },
+  {
+    "id": "program-infrastructure",
+    "sort": 5,
+    "published": true,
+    "icon": "heroicons:building-office-2",
+    "title": "Infrastructure",
+    "text": "Building for people"
+  },
+  {
+    "id": "program-peace",
+    "sort": 6,
+    "published": true,
+    "icon": "heroicons:shield-check",
+    "title": "Peace & Security",
+    "text": "Safer, stronger cities and communities"
+  },
+  {
+    "id": "program-disaster",
+    "sort": 7,
+    "published": true,
+    "icon": "icon-park-outline:leaves",
+    "title": "Disaster Preparedness",
+    "text": "Ready for tomorrow"
+  }
+]

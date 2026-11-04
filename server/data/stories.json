@@ -1,0 +1,32 @@
+[
+  {
+    "id": "story-service",
+    "sort": 1,
+    "published": true,
+    "title": "A life in public service",
+    "slug": "a-life-in-public-service",
+    "excerpt": "From Scholarship to classrooms, Education remains a top priority.",
+    "body": "Sara Duterte began her elected service in Davao City and carried that work to the national government. Her public life has stayed centered on education, health, and communities that need a stronger tomorrow.",
+    "image": "/media/imag4.jpg"
+  },
+  {
+    "id": "story-davao",
+    "sort": 2,
+    "published": true,
+    "title": "On the Ground, With the People  ",
+    "slug": "on-the-ground-with-the-people",
+    "excerpt": "Stories from the ground, with the people.",
+    "body": "As vice mayor and then mayor, she focused on inclusive development and services that families could feel in daily life. Those years remain the foundation of her national work.",
+    "image": "/media/IMG_4361.jpg"
+  },
+  {
+    "id": "story-davao",
+    "sort": 2,
+    "published": true,
+    "title": "A Stronger Davao",
+    "slug": "on-the-ground-with-the-people",
+    "excerpt": "Building a Safer, Stronger Davao, one community at a time.",
+    "body": "As vice mayor and then mayor, she focused on inclusive development and services that families could feel in daily life. Those years remain the foundation of her national work.",
+    "image": "/media/IMG_9719.jpg"
+  }
+]
