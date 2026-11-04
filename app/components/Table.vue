@@ -12,7 +12,7 @@
             >
               {{ column.label }}
             </th>
-            <th v-if="actions" class="px-4 py-3 text-right font-semibold">Actions</th>
+            <th v-if="actions" class="px-4 py-3 text-right font-semibold">Actionss</th>
           </tr>
         </thead>
         <tbody>
