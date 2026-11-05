@@ -86,6 +86,12 @@ const password = ref("")
 const showPassword = ref(false)
 const errorMessage = ref("")
 const pending = ref(false)
+const adminSession = useCookie("sara_admin", {
+  path: "/",
+  sameSite: "lax",
+  secure: !import.meta.dev,
+  maxAge: 60 * 60 * 24 * 7,
+})
 
 function readError(error: unknown) {
   const response = error as { response?: { data?: { message?: unknown, errors?: Record<string, string[]> } } }
@@ -106,7 +112,16 @@ function signIn() {
       email: username.value,
       password: password.value,
     }))
-    .then(() => navigateTo("/admin/dashboard"))
+    .then(async () => {
+      adminSession.value = "1"
+      try {
+        await $fetch("/session", { method: "POST" })
+      }
+      catch {
+        // The static host has no Node route for /session.
+      }
+    })
+    .then(() => navigateTo("/admin/banners"))
     .catch((error) => {
       errorMessage.value = readError(error)
     })

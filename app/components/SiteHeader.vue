@@ -1,11 +1,11 @@
 <template>
   <header class="sticky top-0 z-50 border-b border-neutral-200/80 bg-white">
-    <div class="mx-auto flex max-w-[1440px] items-center gap-4 px-4 py-3.5 sm:px-6 min-[1180px]:grid min-[1180px]:grid-cols-[1fr_auto_1fr] min-[1180px]:items-center lg:px-8">
+    <div class="mx-auto flex max-w-[1440px] items-center gap-4 px-4 py-3.5 sm:px-6 min-[1180px]:grid min-[1180px]:grid-cols-[auto_1fr_auto] min-[1180px]:items-center lg:px-8">
       <NuxtLink to="/" class="min-w-0 shrink leading-none">
         <span class="block whitespace-nowrap font-serif text-[0.95rem] font-medium uppercase tracking-[0.12em] text-forest min-[420px]:text-[1.15rem] min-[420px]:tracking-[0.16em] sm:text-[1.65rem] sm:tracking-[0.2em]">
           Sara Duterte
         </span>
-        <span class="mt-1 hidden text-[9px] font-medium uppercase tracking-[0.22em] text-forest sm:block">
+        <span class="mt-1 hidden whitespace-nowrap text-[9px] font-medium uppercase tracking-[0.22em] text-forest sm:block">
           People • Service • A Stronger Philippines
         </span>
       </NuxtLink>
@@ -18,49 +18,11 @@
           :class="linkClass(link.to)"
           :aria-current="isActive(link.to) ? 'page' : undefined"
         >
-          {{ link.label }}
+          {{ link.label }} 
         </NuxtLink>
       </nav>
 
-      <div class="ml-auto flex items-center justify-self-end gap-2 sm:gap-4 min-[1180px]:ml-0">
-        <form
-          v-if="searchOpen"
-          class="hidden sm:block"
-          role="search"
-          @submit.prevent
-        >
-          <label class="sr-only" for="site-search">Search</label>
-          <input
-            id="site-search"
-            ref="searchInput"
-            v-model="query"
-            type="search"
-            placeholder="Search"
-            class="w-36 border-b border-neutral-300 bg-transparent py-1 text-sm text-neutral-800 outline-none placeholder:text-neutral-400 xl:w-44"
-          >
-        </form>
-
-        <button
-          type="button"
-          class="inline-flex h-10 w-10 items-center justify-center text-neutral-800 hover:text-neutral-950"
-          :aria-expanded="searchOpen"
-          aria-controls="site-search"
-          aria-label="Search"
-          @click="toggleSearch"
-        >
-          <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-            <circle cx="11" cy="11" r="6.25" />
-            <path d="M16.2 16.2 20.5 20.5" stroke-linecap="round" />
-          </svg>
-        </button>
-
-        <NuxtLink
-          to="/archive"
-          class="inline-flex items-center justify-center rounded-sm bg-forest px-3.5 py-2.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white sm:px-5 sm:text-[11px] sm:tracking-[0.18em]"
-        >
-          Archive
-        </NuxtLink>
-
+      <div class="ml-auto flex items-center justify-self-center min-[1180px]:ml-0">
         <button
           type="button"
           class="inline-flex h-10 w-10 items-center justify-center text-neutral-800 min-[1180px]:hidden"
@@ -78,23 +40,6 @@
         </button>
       </div>
     </div>
-
-    <form
-      v-if="searchOpen"
-      class="border-t border-neutral-200 px-4 py-3 sm:hidden"
-      role="search"
-      @submit.prevent
-    >
-      <label class="sr-only" for="site-search-mobile">Search</label>
-      <input
-        id="site-search-mobile"
-        v-model="query"
-        type="search"
-        placeholder="Search"
-        class="w-full border-b border-neutral-300 bg-transparent py-1 text-sm text-neutral-800 outline-none placeholder:text-neutral-400"
-      >
-    </form>
-
     <nav
       v-if="menuOpen"
       id="mobile-nav"
@@ -122,16 +67,15 @@
 const route = useRoute()
 
 const menuOpen = ref(false)
-const searchOpen = ref(false)
-const query = ref("")
-const searchInput = ref<HTMLInputElement | null>(null)
 
 const links = [
   { label: "Home", to: "/" },
   { label: "About", to: "/about" },
   { label: "Public Service", to: "/public-service" },
-  { label: "Accomplishments", to: "/#accomplishments" },
-  { label: "Stories", to: "#stories" },
+  { label: "Accomplishments", to: "/accomplishments" },
+  { label: "Stories", to: "/stories" },
+  { label: "Gallery", to: "/gallery" },
+  { label: "Archive", to: "/archive" },
 ]
 
 function isActive(to: string) {
@@ -161,24 +105,6 @@ function linkClass(to: string) {
       ? "after:absolute after:inset-x-0 after:-bottom-1.5 after:h-[2px] after:bg-forest"
       : "",
   ]
-}
-
-async function toggleSearch() {
-  searchOpen.value = !searchOpen.value
-
-  if (!searchOpen.value) {
-    query.value = ""
-    return
-  }
-
-  await nextTick()
-
-  if (searchInput.value && searchInput.value.offsetParent !== null) {
-    searchInput.value.focus()
-    return
-  }
-
-  document.getElementById("site-search-mobile")?.focus()
 }
 
 watch(

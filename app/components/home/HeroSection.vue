@@ -3,7 +3,7 @@
     <img
       :src="banner.image || fallbackImage"
       alt="Sara Duterte with her hand over her heart beside the Philippine flag"
-      class="absolute inset-0 h-full w-full object-cover object-[46%_28%] sm:object-[center_22%]"
+      class="absolute inset-x-0 top-0 h-[88%] w-full object-cover object-[68%_10%] [mask-image:linear-gradient(to_bottom,black_64%,transparent)] sm:inset-0 sm:h-full sm:object-[60%_16%] sm:[mask-image:none] lg:object-[center_18%]"
     >
 
     <div

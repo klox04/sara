@@ -1,63 +1,48 @@
 <template>
   <section class="bg-white text-neutral-900">
-    <div class="grid lg:min-h-[26rem] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+    <div class="grid lg:min-h-[32rem] lg:grid-cols-2">
       <div class="relative h-80 sm:h-96 lg:h-auto">
         <img
           src="/media/imag1.JPG"
-          alt="Sara Duterte"
-          class="absolute inset-0 h-full w-full object-cover object-[center_22%]"
+          alt="Sara Duterte speaking at a podium"
+          class="absolute inset-0 h-full w-full object-cover object-[center_18%]"
         >
       </div>
-      <div class="p-8">
-        <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-neutral-500">
-          Connect with Sara
-        </p>
-        <h2 class="mt-3 max-w-xl font-serif text-4xl leading-tight sm:text-5xl">
-          Invite. Share. Be Part of the Journey.
-        </h2>
-        <p class="mt-4 max-w-2xl text-sm leading-relaxed text-neutral-600">
-          We welcome invitations, messages, and stories from individuals, organizations, and communities.
-        </p>
 
-        <ul class="mt-5 grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
-          <li v-for="item in actions" :key="item.title">
-            <Icon :name="item.icon" size="1.7rem" class="text-neutral-800" />
-            <h3 class="mt-4 text-sm font-semibold">{{ item.title }}</h3>
-            <p class="mt-2 text-sm leading-relaxed text-neutral-600">{{ item.text }}</p>
-            <NuxtLink :to="item.to" class="mt-5 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-800 hover:text-forest">
-              {{ item.action }}
-              <Icon name="heroicons:arrow-right" size="0.85rem" />
+      <div class="flex flex-col justify-center px-8 py-12 sm:px-12 lg:px-16 xl:px-20">
+        <div class="max-w-xl">
+          <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-neutral-500">
+            Connect with Sara
+          </p>
+          <h2 class="mt-3 max-w-[22rem] font-serif text-4xl leading-[1.08] text-neutral-950 sm:max-w-none sm:text-5xl">
+            Invite. Share. Be Part of the Journey.
+          </h2>
+          <p class="mt-4 max-w-md text-sm leading-relaxed text-neutral-600">
+            We welcome invitations, messages, and stories from individuals, organizations, and communities.
+          </p>
+
+          <div class="mx-auto mt-10 w-full max-w-sm text-center">
+            <div class="flex items-center gap-4 text-neutral-800">
+              <span class="h-px flex-1 bg-neutral-300" aria-hidden="true" />
+              <Icon name="heroicons:envelope" size="1.65rem" aria-hidden="true" />
+              <span class="h-px flex-1 bg-neutral-300" aria-hidden="true" />
+            </div>
+            <h3 class="mt-6 text-lg font-semibold text-neutral-950">
+              Send a Message
+            </h3>
+            <p class="mt-2 text-sm text-neutral-600">
+              Share your thoughts and messages.
+            </p>
+            <NuxtLink
+              to="/connect"
+              class="mt-5 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-800 hover:text-forest"
+            >
+              Send a message
+              <Icon name="heroicons:arrow-right" size="0.9rem" aria-hidden="true" />
             </NuxtLink>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 </template>
-
-<script setup lang="ts">
-const actions = [
-
-  {
-    icon: "heroicons:envelope",
-    title: "Send a Message",
-    text: "Share your thoughts and messages.",
-    action: "Send a message",
-    to: "/connect",
-  },
-  {
-    icon: "heroicons:identification",
-    title: "Media & Press",
-    text: "For interview requests and media inquiries.",
-    action: "Contact media",
-    to: "/connect",
-  },
-  {
-    icon: "heroicons:user-group",
-    title: "Partnerships",
-    text: "Explore opportunities to work together.",
-    action: "Get in touch",
-    to: "/connect",
-  },
-]
-</script>

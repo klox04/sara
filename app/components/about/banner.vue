@@ -8,14 +8,14 @@
 
       <div class="relative mx-auto flex min-h-[34rem] max-w-[1440px] items-center px-6 py-16 sm:min-h-[40rem] sm:px-10 lg:min-h-[46rem] lg:px-16">
         <div class="max-w-xl">
-          <p class="text-[11px] font-medium uppercase tracking-[0.28em] text-neutral-500">
+          <p class="text-[11px] font-medium uppercase tracking-[0.28em] text-white">
             Her Story
           </p>
-          <h1 class="mt-4 max-w-[16rem] font-serif text-[2.7rem] font-medium leading-[1.05] text-neutral-950 sm:max-w-lg sm:text-6xl lg:text-[4.15rem]">
+          <h1 class="mt-4 max-w-[16rem] font-serif text-[2.7rem] font-medium leading-[1.05] text-white sm:max-w-lg sm:text-6xl lg:text-[4.15rem]">
             A Life in<br>
             Public Service
           </h1>
-          <p class="mt-5 max-w-md text-sm leading-relaxed text-neutral-700 sm:text-[15px]">
+          <p class="mt-5 max-w-md text-sm leading-relaxed text-white sm:text-[15px]">
             An editorial introduction to a career spanning Davao City and national public office — shaped by community, service, and a lifelong commitment to the Filipino people.
           </p>
           <NuxtLink

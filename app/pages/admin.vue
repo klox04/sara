@@ -19,6 +19,7 @@ import SharedNavigation from "~/components/shared/Navigation.vue"
 import SharedToolbar from "~/components/shared/Toolbar.vue"
 
 const route = useRoute()
+const adminSession = useCookie("sara_admin", { path: "/" })
 const isLogin = computed(() => route.path === "/admin")
 const navOpen = ref(false)
 const items = [
@@ -28,7 +29,8 @@ const items = [
 ]
 
 function signOut() {
-  $fetch("/api/logout", { method: "POST" })
-    .then(() => navigateTo("/admin"))
+  adminSession.value = null
+  $fetch("/session", { method: "DELETE" }).catch(() => undefined)
+  navigateTo("/admin")
 }
 </script>
