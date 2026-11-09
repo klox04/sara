@@ -24,13 +24,26 @@ const isLogin = computed(() => route.path === "/admin")
 const navOpen = ref(false)
 const items = [
   { title: "Homepage", href: "/admin/banners", action: "heroicons:photo" },
+  { title: "Stories", href: "/admin/stories", action: "heroicons:book-open" },
+  { title: "Messages", href: "/admin/messages", action: "heroicons:envelope" },
   { title: "About", href: "/admin/about", action: "heroicons:user" },
   { title: "Public Service", href: "/admin/public-service", action: "heroicons:squares-2x2" },
-]
+  { title: "Experience", href: "/admin/experience", action: "heroicons:briefcase" },
+  {
+    title: "Registry List",
+    href: "/admin/registry-list",
+    action: "heroicons:squares-2x2",
+    section: "Developer",
+    children: [
+      { title: "Story Category", href: "/admin/registry-list/story-category" },
+      { title: "Initiatives", href: "/admin/registry-list/initiatives" },
+    ],
+  },]
 
-function signOut() {
+async function signOut() {
+  const failure = await navigateTo("/admin")
+  if (failure) return
   adminSession.value = null
   $fetch("/session", { method: "DELETE" }).catch(() => undefined)
-  navigateTo("/admin")
 }
 </script>

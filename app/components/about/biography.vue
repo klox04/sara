@@ -8,20 +8,26 @@
         <h2 class="mt-3 font-serif text-5xl font-medium text-neutral-950 sm:text-6xl">
           Biography
         </h2>
-        <div class="mt-6 max-w-xl space-y-5 text-sm leading-relaxed text-neutral-600 sm:text-[15px]">
-          <p>
-            Sara Duterte served in Davao local government before assuming national office. Her public service journey has been shaped by a deep commitment to her community, practical solutions, and a focus on the well-being of Filipino families.
-          </p>
-          <p>
-            From her early years in local governance to her work on the national stage, she has championed inclusive programs, stronger communities, and opportunities for the next generation.
+        <div v-if="loading" class="mt-6 max-w-xl animate-pulse space-y-3" aria-busy="true">
+          <span class="sr-only">Loading biography…</span>
+          <div class="h-3.5 w-full bg-neutral-200" />
+          <div class="h-3.5 w-11/12 bg-neutral-200" />
+          <div class="h-3.5 w-4/5 bg-neutral-200" />
+          <div class="h-3.5 w-full bg-neutral-100" />
+          <div class="h-3.5 w-3/4 bg-neutral-100" />
+        </div>
+        <div v-else-if="paragraphs.length" class="mt-6 max-w-xl space-y-5 text-sm leading-relaxed text-neutral-600 sm:text-[15px]">
+          <p v-for="(paragraph, index) in paragraphs" :key="index">
+            {{ paragraph }}
           </p>
         </div>
-        <div class="mt-8 flex max-w-xl items-start gap-3 border border-neutral-200 bg-[#fafafa] px-4 py-3.5 text-[13px] leading-relaxed text-neutral-500">
-          <Icon name="heroicons:information-circle" class="mt-0.5 shrink-0 text-neutral-400" size="1.15rem" aria-hidden="true" />
-          <p>
-            Proposed content only. Working, historical details, and sources remain subject to editorial review.
-          </p>
-        </div>
+        <EmptyState
+          v-else
+          class="mt-6 max-w-xl"
+          icon="heroicons:document-text"
+          title="Biography coming soon"
+          text="A fuller account of her life and public service will be published here."
+        />
       </div>
 
       <aside class="bg-[#f3f4f0] px-6 py-8 sm:px-8">
@@ -31,10 +37,21 @@
         <h3 class="mt-3 font-serif text-3xl font-medium text-neutral-950 sm:text-[2rem]">
           Local roots. National roles.
         </h3>
-        <ul class="mt-8 space-y-6">
+        <ul v-if="loading" class="mt-8 animate-pulse space-y-6" aria-busy="true">
+          <li v-for="index in 3" :key="index" class="flex gap-4">
+            <span class="sr-only">Loading roles…</span>
+            <div class="size-11 shrink-0 rounded-full bg-[#e4e6e1]" />
+            <div class="flex-1 pt-1">
+              <div class="h-3.5 w-28 bg-[#e4e6e1]" />
+              <div class="mt-2 h-3 w-40 bg-[#e9ebe6]" />
+              <div class="mt-2 h-3 w-48 bg-[#e9ebe6]" />
+            </div>
+          </li>
+        </ul>
+        <ul v-else-if="roles.length" class="mt-8 space-y-6">
           <li
             v-for="role in roles"
-            :key="role.title + role.meta"
+            :key="role.id"
             class="flex gap-4"
           >
             <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#e4e6e1] text-neutral-500">
@@ -42,47 +59,27 @@
             </span>
             <div class="min-w-0 pt-0.5">
               <p class="font-medium text-neutral-900">{{ role.title }}</p>
-              <p class="mt-0.5 text-sm text-neutral-500">{{ role.meta }}</p>
-              <p class="mt-1 text-sm leading-relaxed text-neutral-500">{{ role.detail }}</p>
+              <p v-if="role.meta" class="mt-0.5 text-sm text-neutral-500">{{ role.meta }}</p>
+              <p v-if="role.detail" class="mt-1 text-sm leading-relaxed text-neutral-500">{{ role.detail }}</p>
             </div>
           </li>
         </ul>
+        <div v-else class="mt-8 flex items-start gap-3 border border-dashed border-neutral-300 bg-white/60 px-4 py-4 text-sm text-neutral-500">
+          <Icon name="heroicons:flag" size="1.15rem" class="mt-0.5 shrink-0 text-neutral-400" aria-hidden="true" />
+          <p>Roles and offices held will be listed here soon.</p>
+        </div>
       </aside>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-const roles = [
-  {
-    icon: "heroicons:building-library",
-    title: "Vice Mayor",
-    meta: "2007 – 2010 · Davao City",
-    detail: "Began her public service career.",
-  },
-  {
-    icon: "heroicons:building-library",
-    title: "Mayor",
-    meta: "2010 – 2013 · Davao City",
-    detail: "Continued city development programs.",
-  },
-  {
-    icon: "heroicons:building-library",
-    title: "Mayor",
-    meta: "2016 – 2022 · Davao City",
-    detail: "Expanded programs and services.",
-  },
-  {
-    icon: "heroicons:building-library",
-    title: "Vice President",
-    meta: "2022 – present · Republic of the Philippines",
-    detail: "Serves the Filipino people on the national stage.",
-  },
-  {
-    icon: "heroicons:book-open",
-    title: "Secretary of Education",
-    meta: "2022 – 2024 · Department of Education",
-    detail: "Led education reforms and learner-focused initiatives.",
-  },
-]
+import EmptyState from "~/components/EmptyState.vue"
+import type { AboutRole } from "~/types/about"
+
+const { paragraphs, roles, loading = false } = defineProps<{
+  paragraphs: string[]
+  roles: AboutRole[]
+  loading?: boolean
+}>()
 </script>

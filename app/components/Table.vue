@@ -8,11 +8,11 @@
               v-for="column in columns"
               :key="column.key"
               class="px-4 py-3 font-semibold"
-              :class="column.align === 'right' ? 'text-right' : 'text-left'"
+              :class="[column.align === 'right' ? 'text-right' : 'text-left', column.nowrap ? 'whitespace-nowrap' : '']"
             >
               {{ column.label }}
             </th>
-            <th v-if="actions" class="px-4 py-3 text-right font-semibold">Actionss</th>
+            <th v-if="actions" class="px-4 py-3 text-right font-semibold">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -21,7 +21,16 @@
               {{ emptyText }}
             </td>
           </tr>
-          <tr v-for="(item, index) in pageItems" :key="menuKey(item) ?? index" class="border-t border-neutral-100">
+          <tr
+            v-for="(item, index) in pageItems"
+            :key="menuKey(item) ?? index"
+            class="border-t border-neutral-100"
+            :class="clickableRows ? 'cursor-pointer hover:bg-neutral-50 focus:outline-none focus-visible:bg-[#e7f6ec]' : ''"
+            :tabindex="clickableRows ? 0 : undefined"
+            @click="selectRow(item)"
+            @keydown.enter.prevent="selectRow(item)"
+            @keydown.space.prevent="selectRow(item)"
+          >
             <td
               v-for="column in columns"
               :key="column.key"
@@ -34,6 +43,19 @@
                 :class="statusClass(item[column.key])"
               >
                 {{ statusLabel(item[column.key]) }}
+              </span>
+              <span
+                v-else-if="column.kind === 'chip' && column.chips?.[String(item[column.key])]"
+                class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold"
+                :class="column.chips[String(item[column.key])]!.class"
+              >
+                <Icon
+                  v-if="column.chips[String(item[column.key])]!.icon"
+                  :name="column.chips[String(item[column.key])]!.icon!"
+                  size="0.85rem"
+                  aria-hidden="true"
+                />
+                {{ item[column.key] }}
               </span>
               <Icon
                 v-else-if="column.kind === 'icon' && isIconName(item[column.key])"
@@ -55,7 +77,9 @@
                 class="inline-flex size-8 items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
                 :aria-expanded="isMenuOpen(item)"
                 aria-label="Open actions"
-                @click="toggleMenu(item, $event)"
+                @click.stop="toggleMenu(item, $event)"
+                @keydown.enter.stop
+                @keydown.space.stop
               >
                 <Icon name="heroicons:ellipsis-vertical" size="1.15rem" />
               </button>
@@ -123,9 +147,11 @@ export type TableColumn = {
   key: string
   label: string
   align?: "left" | "right"
-  kind?: "text" | "status" | "icon"
+  kind?: "text" | "status" | "icon" | "chip"
+  chips?: Record<string, { class: string, icon?: string }>
   strong?: boolean
   truncate?: boolean
+  nowrap?: boolean
 }
 
 export type TableItem = {
@@ -139,9 +165,11 @@ const props = withDefaults(defineProps<{
   actions?: boolean
   minWidth?: string
   pageSizes?: number[]
+  clickableRows?: boolean
 }>(), {
   emptyText: "No items found.",
   actions: true,
+  clickableRows: false,
   minWidth: "min-w-[52rem]",
   pageSizes: () => [10, 25, 50],
 })
@@ -149,6 +177,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   edit: [id: string | number]
   delete: [id: string | number]
+  select: [id: string | number]
 }>()
 
 const storageUrl = String(useRuntimeConfig().public.storageUrl || "")
@@ -201,6 +230,7 @@ function cellClass(column: TableColumn) {
     column.align === "right" ? "text-right" : "text-left",
     column.strong ? "font-medium text-neutral-900" : "text-neutral-600",
     column.truncate ? "max-w-xs" : "",
+    column.nowrap ? "whitespace-nowrap" : "",
   ]
 }
 
@@ -219,6 +249,12 @@ function menuKey(item: TableItem) {
   const id = item.id ?? item.uuid
   if (id === undefined || id === null || id === "") return null
   return id
+}
+
+function selectRow(item: TableItem) {
+  if (!props.clickableRows) return
+  const key = menuKey(item)
+  if (key !== null) emit("select", key)
 }
 
 function isMenuOpen(item: TableItem) {

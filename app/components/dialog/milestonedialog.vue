@@ -123,6 +123,49 @@
           />
 
           <div class="mt-5">
+            <p id="milestone-for-label" class="text-sm font-semibold" :class="fieldErrors.for ? 'text-red-700' : 'text-neutral-800'">
+              Show On <span class="text-red-500">*</span>
+            </p>
+            <div role="radiogroup" aria-labelledby="milestone-for-label" class="mt-3 grid gap-3 sm:grid-cols-2">
+              <label
+                v-for="option in forOptions"
+                :key="option.value"
+                class="flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#1f7a4d]/30"
+                :class="form.for === option.value
+                  ? 'border-[#1f7a4d] bg-[#e7f6ec]'
+                  : fieldErrors.for ? 'border-red-500 hover:bg-neutral-50' : 'border-neutral-300 hover:bg-neutral-50'"
+              >
+                <input
+                  v-model="form.for"
+                  type="radio"
+                  name="milestone-for"
+                  :value="option.value"
+                  class="sr-only"
+                  @change="clearFieldError('for')"
+                >
+                <span
+                  class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg"
+                  :class="form.for === option.value ? 'bg-[#1f7a4d] text-white' : 'bg-neutral-100 text-neutral-600'"
+                >
+                  <Icon :name="option.icon" size="1.1rem" aria-hidden="true" />
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="block text-sm font-semibold text-neutral-900">{{ option.label }}</span>
+                  <span class="block text-xs text-neutral-500">{{ option.hint }}</span>
+                </span>
+                <Icon
+                  v-if="form.for === option.value"
+                  name="heroicons:check-circle-solid"
+                  size="1.2rem"
+                  class="shrink-0 text-[#1f7a4d]"
+                  aria-hidden="true"
+                />
+              </label>
+            </div>
+            <span v-if="fieldErrors.for" class="mt-1 block text-sm text-red-600">{{ fieldErrors.for }}</span>
+          </div>
+
+          <div class="mt-5">
             <p class="text-sm font-semibold text-neutral-800">
               Active <span class="text-red-500">*</span>
             </p>
@@ -131,6 +174,7 @@
                 type="button"
                 role="switch"
                 :aria-checked="form.active"
+                aria-label="Active"
                 class="relative h-6 w-11 rounded-full transition"
                 :class="form.active ? 'bg-[#1f7a4d]' : 'bg-neutral-300'"
                 @click="form.active = !form.active"
@@ -140,7 +184,7 @@
                   :class="form.active ? 'left-5' : 'left-0.5'"
                 />
               </button>
-              <span class="text-sm text-neutral-800">Active (visible on website)</span>
+              <span class="text-sm text-neutral-800">{{ form.active ? "Active (visible on website)" : "Inactive (hidden from website)" }}</span>
             </div>
           </div>
 
@@ -173,6 +217,7 @@ const props = defineProps<{
     organization: string
     period: string
     description: string
+    for: MilestoneFor | ""
     active: boolean
   } | null
 }>()
@@ -185,9 +230,17 @@ const emit = defineEmits<{
     organization: string
     period: string
     description: string
+    for: MilestoneFor
     active: boolean
   }]
 }>()
+
+type MilestoneFor = "home" | "about"
+
+const forOptions: { value: MilestoneFor, label: string, hint: string, icon: string }[] = [
+  { value: "home", label: "Home", hint: "Shown in Her Journey on the homepage.", icon: "heroicons:home" },
+  { value: "about", label: "About", hint: "Shown on the About page.", icon: "heroicons:user" },
+]
 
 const { NEW_POST_API } = useGlobalStore()
 const { toast } = useToast()
@@ -204,6 +257,7 @@ const form = reactive({
   organization: "",
   period: "",
   description: "",
+  for: "" as MilestoneFor | "",
   active: true,
 })
 const fieldErrors = reactive<Record<string, string>>({})
@@ -246,6 +300,7 @@ function fillForm() {
     form.organization = ""
     form.period = ""
     form.description = ""
+    form.for = ""
     form.active = true
     return
   }
@@ -255,6 +310,7 @@ function fillForm() {
   form.organization = milestone.organization
   form.period = milestone.period
   form.description = milestone.description
+  form.for = milestone.for
   form.active = milestone.active
 }
 
@@ -356,7 +412,8 @@ function saveMilestone() {
   if (!form.title.trim()) fieldErrors.title = "Title is required."
   if (!form.organization.trim()) fieldErrors.organization = "Organization is required."
   if (!form.description.trim()) fieldErrors.description = "Description is required."
-  if (Object.keys(fieldErrors).length) return
+  if (!form.for) fieldErrors.for = "Choose where to show this milestone."
+  if (Object.keys(fieldErrors).length || !form.for) return
   emit("saved", {
     id: props.milestone?.id,
     year: form.year.trim(),
@@ -365,6 +422,7 @@ function saveMilestone() {
     organization: form.organization.trim(),
     period: form.period.trim(),
     description: form.description.trim(),
+    for: form.for,
     active: form.active,
   })
   open.value = false
