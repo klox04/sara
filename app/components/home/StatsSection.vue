@@ -24,22 +24,54 @@
         </div>
       </div>
 
-      <div class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.05fr)_minmax(16rem,0.85fr)] lg:gap-8">
-        <article v-for="item in figures" :key="item.value">
-          <p class="font-serif text-5xl leading-none">{{ item.value }}</p>
-          <p class="mt-4 max-w-[14rem] text-sm leading-relaxed text-white/75">{{ item.label }}</p>
-          <a :href="item.source" class="mt-5 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-white/80 hover:text-white">
-            View source
-            <Icon name="heroicons:arrow-right" size="0.85rem" />
-          </a>
-        </article>
+      <div
+        v-if="loading"
+        class="mt-10 grid animate-pulse gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8"
+        aria-busy="true"
+      >
+        <span class="sr-only">Loading statistics…</span>
+        <div v-for="index in 4" :key="index">
+          <div class="h-12 w-28 bg-white/10" />
+          <div class="mt-4 h-3 w-44 bg-white/5" />
+          <div class="mt-2 h-3 w-36 bg-white/5" />
+        </div>
+      </div>
 
-        <blockquote class="lg:border-l lg:border-white/15 lg:pl-8">
+      <EmptyState
+        v-else-if="!impact || (!impact.figures.length && !impact.statement)"
+        dark
+        class="mt-10"
+        icon="heroicons:chart-bar"
+        title="Results are being compiled"
+        text="Figures from programs, initiatives, and recognitions will be shared here soon."
+        to="/accomplishments"
+        link-label="See accomplishments"
+      />
+
+      <div v-else class="mt-10 grid gap-10 lg:gap-8" :class="impact.statement ? 'lg:grid-cols-[minmax(0,1fr)_minmax(16rem,0.24fr)]' : ''">
+        <div v-if="impact.figures.length" class="grid gap-10 sm:grid-cols-2 lg:gap-8" :class="figureColumns">
+          <article v-for="item in impact.figures" :key="item.id">
+            <p class="font-serif text-5xl leading-none lining-nums">{{ item.value }}</p>
+            <p class="mt-4 max-w-[14rem] text-sm leading-relaxed text-white/75">{{ item.label }}</p>
+            <a
+              v-if="item.source"
+              :href="item.source"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-5 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-white/80 hover:text-white"
+            >
+              View source
+              <Icon name="heroicons:arrow-right" size="0.85rem" />
+            </a>
+          </article>
+        </div>
+
+        <blockquote v-if="impact.statement" class="lg:border-l lg:border-white/15 lg:pl-8">
           <p class="font-serif text-2xl italic leading-snug text-white/95 sm:text-[1.7rem]">
-            “ Progress is not just about numbers, but about people’s lives getting better. ”
+            “ {{ impact.statement }} ”
           </p>
-          <footer class="mt-5 text-[11px] font-medium uppercase tracking-[0.18em] text-white/70">
-            — Sara Duterte
+          <footer v-if="impact.attribution" class="mt-5 text-[11px] font-medium uppercase tracking-[0.18em] text-white/70">
+            — {{ impact.attribution }}
           </footer>
         </blockquote>
       </div>
@@ -48,26 +80,18 @@
 </template>
 
 <script setup lang="ts">
-const figures = [
-  {
-    value: "118",
-    label: "Awards and recognitions received by Davao City (Sept 2016 – Feb 2022)",
-    source: "#",
-  },
-  {
-    value: "1,904",
-    label: "City government scholars reported in the 2019 SOCA",
-    source: "#",
-  },
-  {
-    value: "112",
-    label: "Classrooms constructed through Special Education Fund projects",
-    source: "#",
-  },
-  {
-    value: "₱279B",
-    label: "Reported Davao investment portfolio in 2018 (from ₱230B in 2016)",
-    source: "#",
-  },
-]
+import EmptyState from "~/components/EmptyState.vue"
+import type { Impact } from "~/types/impact"
+
+const { impact, loading = false } = defineProps<{
+  impact: Impact | null
+  loading?: boolean
+}>()
+
+const figureColumns = computed(() => {
+  const count = impact?.figures.length ?? 0
+  if (count <= 2) return "lg:grid-cols-2"
+  if (count === 3) return "lg:grid-cols-3"
+  return "lg:grid-cols-4"
+})
 </script>

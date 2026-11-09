@@ -33,16 +33,26 @@
             <p class="mt-2 text-sm text-neutral-600">
               Share your thoughts and messages.
             </p>
-            <NuxtLink
-              to="/connect"
+            <button
+              type="button"
+              aria-haspopup="dialog"
               class="mt-5 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-800 hover:text-forest"
+              @click="messageOpen = true"
             >
               Send a message
               <Icon name="heroicons:arrow-right" size="0.9rem" aria-hidden="true" />
-            </NuxtLink>
+            </button>
           </div>
         </div>
       </div>
     </div>
+
+    <MessageDialog v-model:open="messageOpen" />
   </section>
 </template>
+
+<script setup lang="ts">
+import MessageDialog from "~/components/dialog/messagedialog.vue"
+
+const messageOpen = ref(false)
+</script>

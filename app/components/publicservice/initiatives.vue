@@ -52,7 +52,7 @@
 
       <div class="mt-8 flex flex-col gap-2 text-[13px] text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
         <p>{{ filtered.length }} programs to explore</p>
-        <p>Sample content · Program details may vary</p>
+        
       </div>
 
       <div v-if="visible.length" class="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
