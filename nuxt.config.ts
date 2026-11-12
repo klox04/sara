@@ -1,8 +1,14 @@
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
-  modules: ["@pinia/nuxt", "@nuxt/icon/module"],
+  modules: ["@pinia/nuxt", "@nuxt/icon/module", "nuxt-echarts"],
   compatibilityDate: "2025-07-15",
+
+  echarts: {
+    renderer: "svg",
+    charts: ["LineChart", "PieChart"],
+    components: ["GridComponent", "TooltipComponent", "MarkPointComponent"],
+  },
 
   app: {
     head: {

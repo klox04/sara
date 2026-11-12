@@ -6,6 +6,7 @@
     <StoriesPreview :stories="stories" :loading="loading" />
     <StatsSection :impact="impact" :loading="loading" />
     <ConnectSection />
+    <CommunityMessages />
   </main>
 </template>
 
@@ -16,6 +17,7 @@ import JourneySection from "~/components/home/JourneySection.vue"
 import StoriesPreview from "~/components/home/StoriesPreview.vue"
 import StatsSection from "~/components/home/StatsSection.vue"
 import ConnectSection from "~/components/home/ConnectSection.vue"
+import CommunityMessages from "~/components/home/CommunityMessages.vue"
 import type { Banner } from "~/types/banner"
 import type { Impact } from "~/types/impact"
 import type { Journey } from "~/types/journey"
