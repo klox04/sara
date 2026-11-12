@@ -1,7 +1,7 @@
 <template>
   <section>
     <NuxtLink
-      to="/admin/public-service"
+      :to="listPath"
       class="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-forest"
     >
       <Icon name="heroicons:arrow-left" size="1rem" aria-hidden="true" />
@@ -14,7 +14,7 @@
       />
       <div v-if="!loading && !loadError" class="flex shrink-0 gap-3">
         <NuxtLink
-          to="/admin/public-service"
+          :to="listPath"
           class="rounded-lg border border-neutral-300 bg-white px-5 py-2.5 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
         >
           Cancel
@@ -36,7 +36,7 @@
 
     <div v-else-if="loadError" class="mt-6 rounded-xl border border-neutral-200 bg-white px-6 py-10 text-center shadow-sm">
       <p class="text-sm text-neutral-700">{{ loadError }}</p>
-      <NuxtLink to="/admin/public-service" class="mt-4 inline-flex text-sm font-medium text-[#1f7a4d] hover:underline">
+      <NuxtLink :to="listPath" class="mt-4 inline-flex text-sm font-medium text-[#1f7a4d] hover:underline">
         Back to programs
       </NuxtLink>
     </div>
@@ -53,32 +53,32 @@
 
         <div class="mt-4 grid gap-5 sm:grid-cols-2">
           <div>
-            <label for="program-initiative" class="text-sm font-semibold" :class="fieldErrors.initiative ? 'text-red-700' : 'text-neutral-900'">
-              Initiative <span class="text-red-500">*</span>
+            <label for="program-milestone" class="text-sm font-semibold" :class="fieldErrors.milestone ? 'text-red-700' : 'text-neutral-900'">
+              Milestone <span class="text-red-500">*</span>
             </label>
             <div class="relative mt-2">
               <Icon
-                :name="selectedInitiative ? initiativeIcon(selectedInitiative.icon) : 'heroicons:light-bulb'"
+                name="heroicons:flag"
                 size="1rem"
                 class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
-                :class="selectedInitiative ? 'text-[#1f7a4d]' : 'text-neutral-500'"
+                :class="form.milestone ? 'text-[#1f7a4d]' : 'text-neutral-500'"
               />
               <select
-                id="program-initiative"
-                v-model="form.initiative"
-                class="w-full appearance-none rounded-md border bg-white py-2.5 pl-9 pr-8 text-sm outline-none"
+                id="program-milestone"
+                v-model="form.milestone"
+                class="w-full appearance-none truncate rounded-md border bg-white py-2.5 pl-9 pr-8 text-sm outline-none"
                 :class="[
-                  fieldErrors.initiative ? 'border-red-500' : 'border-neutral-300 focus:border-[#1f7a4d]',
-                  form.initiative ? 'text-neutral-900' : 'text-neutral-500',
+                  fieldErrors.milestone ? 'border-red-500' : 'border-neutral-300 focus:border-[#1f7a4d]',
+                  form.milestone ? 'text-neutral-900' : 'text-neutral-500',
                 ]"
-                @change="clearFieldError('initiative')"
+                @change="clearFieldError('milestone')"
               >
-                <option value="" disabled>Select initiative</option>
-                <option v-for="initiative in initiatives" :key="initiative.uuid" :value="initiative.uuid">{{ initiative.name }}</option>
+                <option value="" disabled>Select milestone</option>
+                <option v-for="milestone in milestones" :key="milestone.uuid" :value="milestone.uuid">{{ milestone.label }}</option>
               </select>
               <Icon name="heroicons:chevron-down" size="1rem" class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500" />
             </div>
-            <span v-if="fieldErrors.initiative" class="mt-1 block text-sm text-red-600">{{ fieldErrors.initiative }}</span>
+            <span v-if="fieldErrors.milestone" class="mt-1 block text-sm text-red-600">{{ fieldErrors.milestone }}</span>
           </div>
 
           <div>
@@ -198,26 +198,28 @@
 
         <div class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
           <h2 class="text-lg font-semibold text-neutral-900">Visibility</h2>
-          <div class="mt-3 flex items-center gap-3 py-3">
-            <button
-              type="button"
-              role="switch"
-              :aria-checked="form.featured"
-              aria-label="Is Featured"
-              class="relative h-6 w-11 shrink-0 rounded-full transition"
-              :class="form.featured ? 'bg-[#1f7a4d]' : 'bg-neutral-300'"
-              @click="form.featured = !form.featured"
-            >
-              <span
-                class="absolute top-0.5 size-5 rounded-full bg-white shadow transition-all"
-                :class="form.featured ? 'left-5' : 'left-0.5'"
-              />
-            </button>
-            <span>
-              <span class="block text-sm font-semibold text-neutral-900">Is Featured</span>
-              <span class="block text-xs text-neutral-500">Highlight this program on the Public Service page.</span>
-            </span>
-          </div>
+          <ul class="mt-3 divide-y divide-neutral-200">
+            <li v-for="item in visibility" :key="item.key" class="flex items-center gap-3 py-3">
+              <button
+                type="button"
+                role="switch"
+                :aria-checked="form[item.key]"
+                :aria-label="item.label"
+                class="relative h-6 w-11 shrink-0 rounded-full transition"
+                :class="form[item.key] ? 'bg-[#1f7a4d]' : 'bg-neutral-300'"
+                @click="form[item.key] = !form[item.key]"
+              >
+                <span
+                  class="absolute top-0.5 size-5 rounded-full bg-white shadow transition-all"
+                  :class="form[item.key] ? 'left-5' : 'left-0.5'"
+                />
+              </button>
+              <span>
+                <span class="block text-sm font-semibold text-neutral-900">{{ item.label }}</span>
+                <span class="block text-xs text-neutral-500">{{ item.hint }}</span>
+              </span>
+            </li>
+          </ul>
         </div>
       </div>
     </form>
@@ -232,12 +234,10 @@
 
 <script setup lang="ts">
 import DiscardDialog from "~/components/dialog/discarddialog.vue"
-import { initiativeIcon } from "~~/shared/initiatives"
 
-type Initiative = {
+type Milestone = {
   uuid: string
-  name: string
-  icon: string
+  label: string
 }
 
 type ProgramRecord = Record<string, unknown>
@@ -252,32 +252,40 @@ const { GET_API, POST_API, PATCH_API, NEW_POST_API } = useGlobalStore()
 const { toast } = useToast()
 const storageUrl = String(useRuntimeConfig().public.storageUrl || "")
 
+const listPath = "/admin/public-service?tab=program"
 const maxDescription = 500
 const maxContent = 5000
 const maxFileMb = 200
 const allowedTypes = ["image/jpeg", "image/png", "image/webp"]
 const fileAccept = "image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
 const apiFields: Record<string, string> = {
-  initiative_uuid: "initiative",
+  milestone_uuid: "milestone",
   title: "title",
   description: "description",
   content: "content",
   file_path: "file",
 }
+const visibility = [
+  { key: "active", label: "Active", hint: "Show this program on the website." },
+  { key: "featured", label: "Is Featured", hint: "Highlight this program in the Historical initiatives section of the Public Service page." },
+  { key: "mainFeatured", label: "Main Featured", hint: "Highlight this program on the About page." },
+] as const
 
 const programId = computed(() => String(route.params.id ?? ""))
 const isNew = computed(() => programId.value === "create")
 
 const form = reactive({
-  initiative: "",
+  milestone: "",
   title: "",
   description: "",
   content: "",
   file: "",
+  active: true,
   featured: false,
+  mainFeatured: false,
 })
 const fieldErrors = reactive<Record<string, string>>({})
-const initiatives = ref<Initiative[]>([])
+const milestones = ref<Milestone[]>([])
 const loading = ref(false)
 const loadError = ref("")
 const saving = ref(false)
@@ -288,8 +296,6 @@ const fileName = ref("")
 const dragOver = ref(false)
 const discardOpen = ref(false)
 let resolveDiscard: ((discard: boolean) => void) | null = null
-
-const selectedInitiative = computed(() => initiatives.value.find(item => item.uuid === form.initiative) ?? null)
 
 function snapshot() {
   return JSON.stringify(form)
@@ -326,13 +332,15 @@ function clearFieldErrors() {
 }
 
 function fillForm(record: ProgramRecord) {
-  const initiative = record.initiative && typeof record.initiative === "object" ? record.initiative as ProgramRecord : null
-  form.initiative = readText(record.initiative_uuid) || readText(initiative?.uuid)
+  const milestone = record.milestone && typeof record.milestone === "object" ? record.milestone as ProgramRecord : null
+  form.milestone = readText(record.milestone_uuid) || readText(milestone?.uuid)
   form.title = readText(record.title)
   form.description = readText(record.description)
   form.content = readText(record.content)
   form.file = readText(record.file_path)
+  form.active = readBoolean(record.is_active, true)
   form.featured = readBoolean(record.is_featured, false)
+  form.mainFeatured = readBoolean(record.is_main_featured, false)
   fileName.value = form.file.split("/").pop() || ""
 }
 
@@ -363,12 +371,17 @@ async function getProgram() {
   }
 }
 
-function getInitiatives() {
-  GET_API({ api: "initiatives" }).then((response) => {
+function getMilestones() {
+  GET_API({ api: "milestones", per_page: 100 }).then((response) => {
     const rows = Array.isArray(response.data?.data) ? response.data.data as ProgramRecord[] : []
-    initiatives.value = rows.flatMap((row) => {
+    milestones.value = rows.flatMap((row) => {
       const uuid = readText(row.uuid)
-      return uuid ? [{ uuid, name: readText(row.name) || uuid, icon: readText(row.icon) }] : []
+      if (!uuid || readText(row.for).toLowerCase() !== "home") return []
+      const year = typeof row.year === "number" ? String(row.year) : readText(row.year)
+      const title = readText(row.title) || uuid
+      const organization = readText(row.organization)
+      const label = [year, title, organization].filter(Boolean).join(" · ")
+      return [{ uuid, label }]
     })
   })
 }
@@ -476,7 +489,7 @@ async function uploadFileInChunks(file: File) {
 
 function validate() {
   clearFieldErrors()
-  if (!form.initiative) fieldErrors.initiative = "Initiative is required."
+  if (!form.milestone) fieldErrors.milestone = "Milestone is required."
   if (!form.title.trim()) fieldErrors.title = "Title is required."
   if (!form.description.trim()) fieldErrors.description = "Description is required."
   else if (form.description.length > maxDescription) fieldErrors.description = `Description must be ${maxDescription} characters or fewer.`
@@ -504,12 +517,14 @@ function saveProgram() {
     return
   }
   const payload = {
-    initiative_uuid: form.initiative,
+    milestone_uuid: form.milestone,
     title: form.title.trim(),
     description: form.description.trim(),
     content: form.content.trim() || null,
     file_path: form.file,
+    is_active: form.active,
     is_featured: form.featured,
+    is_main_featured: form.mainFeatured,
   }
   saving.value = true
   const request = isNew.value
@@ -519,7 +534,7 @@ function saveProgram() {
     .then(() => {
       toast("success", isNew.value ? "Program saved." : "Program updated.")
       savedState.value = snapshot()
-      return navigateTo("/admin/public-service")
+      return navigateTo(listPath)
     })
     .catch((error: { response?: { data?: ApiErrorData } }) => {
       toast("error", applyApiErrors(error.response?.data))
@@ -554,7 +569,7 @@ function warnBeforeUnload(event: BeforeUnloadEvent) {
 }
 
 onMounted(() => {
-  getInitiatives()
+  getMilestones()
   getProgram()
   window.addEventListener("beforeunload", warnBeforeUnload)
 })

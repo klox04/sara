@@ -18,14 +18,18 @@
     <div class="p-5">
       <Field
         v-model="query"
+        @keydown.enter.prevent="search"
         placeholder="Search program..."
         class="max-w-md"
       />
 
       <Table
+        v-model:page="page"
+        v-model:per-page="perPage"
         class="mt-4"
         :columns="columns"
         :items="tableItems"
+        :total="total"
         :empty-text="emptyText"
         @edit="editProgram"
         @delete="deleteProgram"
@@ -40,56 +44,47 @@ type ProgramRow = {
   image: string
   title: string
   description: string
-  initiative: string
-  featured: string
+  active: boolean
 }
 
-const { GET_API, DELETE_API } = useGlobalStore()
+const { DELETE_API } = useGlobalStore()
 const { toast } = useToast()
 
-const programs = ref<ProgramRow[]>([])
-const query = ref("")
-const loading = ref(true)
+const { items, query, searchTerm, search, page, perPage, total, offset, loading, load: getPrograms } = usePagedList<ProgramRow>({
+  api: "programs",
+  map: (row, index) => ({
+    id: readText(row.uuid) || (typeof row.id === "number" ? row.id : index),
+    image: readText(row.file_path),
+    title: readText(row.title),
+    description: readText(row.description),
+    active: readBoolean(row.is_active, true),
+  }),
+})
 
 const columns = [
   { key: "number", label: "#" },
   { key: "image", label: "Image", kind: "icon" as const },
   { key: "title", label: "Title", strong: true },
   { key: "description", label: "Description", truncate: true },
-  { key: "initiative", label: "Initiative", nowrap: true },
-  {
-    key: "featured",
-    label: "Featured",
-    kind: "chip" as const,
-    chips: {
-      Featured: { class: "bg-[#e7f6ec] text-[#1f7a4d]", icon: "heroicons:star" },
-    },
-  },
+  { key: "active", label: "Status", kind: "status" as const },
 ]
 
 const emptyText = computed(() => {
   if (loading.value) return "Loading programs…"
-  return query.value.trim() ? "No programs match that search." : "No programs yet."
+  return searchTerm.value ? "No programs match that search." : "No programs yet."
 })
 
-const tableItems = computed(() => {
-  const numbered = programs.value.map((item, index) => ({ ...item, number: index + 1 }))
-  const term = query.value.trim().toLowerCase()
-  if (!term) return numbered
-  return numbered.filter(item =>
-    [item.title, item.description, item.initiative].some(value => value.toLowerCase().includes(term)),
-  )
-})
+const tableItems = computed(() => items.value.map((item, index) => ({ ...item, number: offset.value + index + 1 })))
 
 function readText(value: unknown) {
   return typeof value === "string" ? value : ""
 }
 
-function readBoolean(value: unknown) {
+function readBoolean(value: unknown, fallback = false) {
   if (typeof value === "boolean") return value
   if (typeof value === "number") return value === 1
-  if (typeof value === "string") return ["1", "true"].includes(value.toLowerCase())
-  return false
+  if (typeof value === "string") return ["1", "true", "active"].includes(value.toLowerCase())
+  return fallback
 }
 
 function editProgram(id: string | number) {
@@ -107,33 +102,4 @@ function deleteProgram(id: string | number) {
       toast("error", typeof message === "string" && message ? message : "The program could not be deleted.")
     })
 }
-
-function getPrograms() {
-  loading.value = true
-  GET_API({ api: "programs" })
-    .then((response) => {
-      const rows = Array.isArray(response.data?.data) ? response.data.data as Record<string, unknown>[] : []
-      programs.value = rows.map((row, index) => {
-        const initiative = row.initiative && typeof row.initiative === "object" ? row.initiative as Record<string, unknown> : null
-        return {
-          id: readText(row.uuid) || (typeof row.id === "number" ? row.id : index),
-          image: readText(row.file_path),
-          title: readText(row.title),
-          description: readText(row.description),
-          initiative: readText(initiative?.name) || "—",
-          featured: readBoolean(row.is_featured) ? "Featured" : "—",
-        }
-      })
-    })
-    .catch(() => {
-      programs.value = []
-    })
-    .finally(() => {
-      loading.value = false
-    })
-}
-
-onMounted(() => {
-  getPrograms()
-})
 </script>

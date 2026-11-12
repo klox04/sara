@@ -13,7 +13,7 @@
         <div class="min-w-0 flex-1">
           <h2 class="text-2xl font-semibold text-neutral-900">All Messages</h2>
           <p class="mt-0.5 text-sm text-neutral-500">
-            {{ loading ? "Loading messages…" : `${messages.length} ${messages.length === 1 ? "message" : "messages"} received` }}
+            {{ loading ? "Loading messages…" : `${total} ${total === 1 ? "message" : "messages"} received` }}
           </p>
         </div>
       </div>
@@ -21,14 +21,18 @@
       <div class="p-5">
         <Field
           v-model="query"
+          @keydown.enter.prevent="search"
           placeholder="Search name or message..."
           class="max-w-md"
         />
 
         <Table
+          v-model:page="page"
+          v-model:per-page="perPage"
           class="mt-4"
           :columns="columns"
           :items="tableItems"
+          :total="total"
           :actions="false"
           :empty-text="emptyText"
           clickable-rows
@@ -52,12 +56,21 @@ type MessageRow = {
   sortTime: number
 }
 
-const { GET_API } = useGlobalStore()
-
-const messages = ref<MessageRow[]>([])
-const query = ref("")
-const loading = ref(true)
-const loadFailed = ref(false)
+const { rows: messages, items, query, searchTerm, search, page, perPage, total, loading, failed: loadFailed } = usePagedList<MessageRow>({
+  api: "messages",
+  map: (row, index) => {
+    const createdAt = readText(row.created_at)
+    const uuid = readText(row.uuid)
+    return {
+      id: uuid || (typeof row.id === "string" || typeof row.id === "number" ? row.id : index),
+      name: readText(row.name),
+      message: readText(row.message),
+      received: formatDate(createdAt),
+      sortTime: new Date(createdAt).getTime() || 0,
+    }
+  },
+  filter: (item, term) => [item.name, item.message].some(value => value.toLowerCase().includes(term)),
+})
 const viewOpen = ref(false)
 const selected = ref<MessageRow | null>(null)
 
@@ -75,16 +88,10 @@ const columns = [
 const emptyText = computed(() => {
   if (loading.value) return "Loading messages…"
   if (loadFailed.value) return "The messages could not be loaded."
-  return query.value.trim() ? "No messages match that search." : "No messages yet."
+  return searchTerm.value ? "No messages match that search." : "No messages yet."
 })
 
-const tableItems = computed(() => {
-  const term = query.value.trim().toLowerCase()
-  if (!term) return messages.value
-  return messages.value.filter(item =>
-    [item.name, item.message].some(value => value.toLowerCase().includes(term)),
-  )
-})
+const tableItems = computed(() => [...items.value].sort((a, b) => b.sortTime - a.sortTime))
 
 function readText(value: unknown) {
   return typeof value === "string" ? value : ""
@@ -102,36 +109,4 @@ function formatDate(value: string) {
   }).format(date)
 }
 
-function getMessages() {
-  loading.value = true
-  loadFailed.value = false
-  GET_API({ api: "messages" })
-    .then((response) => {
-      const rows = Array.isArray(response.data?.data) ? response.data.data : []
-      messages.value = rows
-        .map((row: Record<string, unknown>, index: number) => {
-          const createdAt = readText(row.created_at)
-          const uuid = readText(row.uuid)
-          return {
-            id: uuid || (typeof row.id === "string" || typeof row.id === "number" ? row.id : index),
-            name: readText(row.name),
-            message: readText(row.message),
-            received: formatDate(createdAt),
-            sortTime: new Date(createdAt).getTime() || 0,
-          }
-        })
-        .sort((a: MessageRow, b: MessageRow) => b.sortTime - a.sortTime)
-    })
-    .catch(() => {
-      messages.value = []
-      loadFailed.value = true
-    })
-    .finally(() => {
-      loading.value = false
-    })
-}
-
-onMounted(() => {
-  getMessages()
-})
 </script>

@@ -24,15 +24,19 @@
       <div class="p-5">
         <Field
           v-model="query"
+          @keydown.enter.prevent="search"
           placeholder="Search story..."
           class="max-w-md"
         />
 
         <Table
+          v-model:page="page"
+          v-model:per-page="perPage"
           class="mt-4"
           :columns="columns"
-          :items="tableItems"
-          empty-text="No stories match that search."
+          :items="items"
+          :total="total"
+          :empty-text="emptyText"
           @edit="editStory"
           @delete="deleteStory"
         />
@@ -42,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-const { GET_API, DELETE_API } = useGlobalStore()
+const { DELETE_API } = useGlobalStore()
 const { toast } = useToast()
 
 type StoryRow = {
@@ -55,8 +59,28 @@ type StoryRow = {
   active: boolean
 }
 
-const stories = ref<StoryRow[]>([])
-const query = ref("")
+const { rows: stories, items, query, searchTerm, search, page, perPage, total, loading, load: getStoryData } = usePagedList<StoryRow>({
+  api: "stories",
+  map: (row, index) => {
+    const uuid = typeof row.uuid === "string" ? row.uuid : ""
+    const category = readCategory(row)
+    return {
+      id: uuid || (typeof row.id === "string" || typeof row.id === "number" ? row.id : index),
+      uuid,
+      image: readText(row.file_path || row.filepath || row.image),
+      title: readText(row.title),
+      excerpt: readText(row.description || row.excerpt),
+      category: category.name,
+      active: readActive(row),
+    }
+  },
+  filter: (item, term) => [item.title, item.excerpt, item.category].some(value => value.toLowerCase().includes(term)),
+})
+
+const emptyText = computed(() => {
+  if (loading.value) return "Loading stories…"
+  return searchTerm.value ? "No stories match that search." : "No stories yet."
+})
 
 function openAdd() {
   navigateTo("/admin/stories/create")
@@ -90,14 +114,6 @@ const columns = [
   { key: "category", label: "Category" },
   { key: "active", label: "Status", kind: "status" as const },
 ]
-const tableItems = computed(() => {
-  const term = query.value.trim().toLowerCase()
-  if (!term) return stories.value
-  return stories.value.filter(item =>
-    [item.title, item.excerpt, item.category].some(value => value.toLowerCase().includes(term)),
-  )
-})
-
 function readText(value: unknown) {
   return typeof value === "string" ? value : ""
 }
@@ -120,30 +136,4 @@ function readActive(row: Record<string, unknown>) {
   return true
 }
 
-function getStoryData() {
-  GET_API({
-    api: "stories",
-  }).then((res) => {
-    const rows = Array.isArray(res.data.data) ? res.data.data : []
-    stories.value = rows.map((row: Record<string, unknown>, index: number) => {
-      const uuid = typeof row.uuid === "string" ? row.uuid : ""
-      const category = readCategory(row)
-      return {
-        id: uuid || (typeof row.id === "string" || typeof row.id === "number" ? row.id : index),
-        uuid,
-        image: readText(row.file_path || row.filepath || row.image),
-        title: readText(row.title),
-        excerpt: readText(row.description || row.excerpt),
-        category: category.name,
-        active: readActive(row),
-      }
-    })
-  }).catch(() => {
-    stories.value = []
-  })
-}
-
-onMounted(() => {
-  getStoryData()
-})
 </script>

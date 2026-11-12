@@ -166,7 +166,9 @@ const props = withDefaults(defineProps<{
   minWidth?: string
   pageSizes?: number[]
   clickableRows?: boolean
+  total?: number
 }>(), {
+  total: undefined,
   emptyText: "No items found.",
   actions: true,
   clickableRows: false,
@@ -181,29 +183,33 @@ const emit = defineEmits<{
 }>()
 
 const storageUrl = String(useRuntimeConfig().public.storageUrl || "")
-const page = ref(1)
-const pageSize = ref(props.pageSizes[0] ?? 10)
+const page = defineModel<number>("page", { default: 1 })
+const pageSize = defineModel<number>("perPage", { default: 10 })
 const openMenuId = ref<string | number | null>(null)
 const menuStyle = ref({ top: "0px", left: "0px" })
 const confirmOpen = ref(false)
 const pendingDeleteId = ref<string | number | null>(null)
 
-const pageCount = computed(() => Math.max(1, Math.ceil(props.items.length / pageSize.value)))
+const serverPaged = computed(() => props.total !== undefined)
+const totalCount = computed(() => serverPaged.value ? props.total ?? 0 : props.items.length)
+
+const pageCount = computed(() => Math.max(1, Math.ceil(totalCount.value / pageSize.value)))
 
 const pageItems = computed(() => {
+  if (serverPaged.value) return props.items
   const start = (page.value - 1) * pageSize.value
   return props.items.slice(start, start + pageSize.value)
 })
 
 const rangeLabel = computed(() => {
-  if (!props.items.length) return "0 of 0"
+  if (!totalCount.value || !pageItems.value.length) return `0 of ${totalCount.value}`
   const start = (page.value - 1) * pageSize.value + 1
-  const end = Math.min(page.value * pageSize.value, props.items.length)
-  return `${start}–${end} of ${props.items.length}`
+  const end = start + pageItems.value.length - 1
+  return `${start}–${end} of ${totalCount.value}`
 })
 
 watch(() => props.items, () => {
-  page.value = 1
+  if (!serverPaged.value) page.value = 1
   openMenuId.value = null
 })
 

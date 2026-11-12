@@ -28,6 +28,11 @@ const items = [
   { title: "Messages", href: "/admin/messages", action: "heroicons:envelope" },
   { title: "About", href: "/admin/about", action: "heroicons:user" },
   { title: "Public Service", href: "/admin/public-service", action: "heroicons:squares-2x2" },
+  { title: "Accomplishments", href: "/admin/accomplishments", action: "heroicons:trophy" },
+  { title: "Stories", href: "/admin/stories", action: "heroicons:book-open" },
+  { title: "Gallery", href: "/admin/gallery", action: "heroicons:camera" },
+  { title: "Archive", href: "/admin/archive", action: "heroicons:archive-box" },
+  { title: "Messages", href: "/admin/messages", action: "heroicons:envelope" },
   { title: "Experience", href: "/admin/experience", action: "heroicons:briefcase" },
   {
     title: "Registry List",
@@ -36,7 +41,9 @@ const items = [
     section: "Developer",
     children: [
       { title: "Story Category", href: "/admin/registry-list/story-category" },
+      { title: "Record Category", href: "/admin/registry-list/record-category" },
       { title: "Initiatives", href: "/admin/registry-list/initiatives" },
+      { title: "Institutions", href: "/admin/registry-list/institutions" },
     ],
   },]
 

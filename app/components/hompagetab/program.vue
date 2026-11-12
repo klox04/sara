@@ -3,6 +3,7 @@
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
       <Field
         v-model="query"
+        @keydown.enter.prevent="search"
         placeholder="Search item..."
         class="flex-1"
       />
@@ -11,10 +12,13 @@
       </Button>
     </div>
     <Table
+      v-model:page="page"
+      v-model:per-page="perPage"
       class="mt-4"
       :columns="columns"
-      :items="filteredPrograms"
-      empty-text="No programs match that search."
+      :items="items"
+      :total="total"
+      :empty-text="emptyText"
       @edit="editProgram"
       @delete="deleteProgram"
     />
@@ -25,7 +29,7 @@
 <script setup lang="ts">
 import ProgramDialog from "~/components/dialog/programdialog.vue"
 
-const { GET_API, DELETE_API } = useGlobalStore()
+const { DELETE_API } = useGlobalStore()
 const { toast } = useToast()
 
 type ProgramRow = {
@@ -36,8 +40,24 @@ type ProgramRow = {
   active: boolean
 }
 
-const programs = ref<ProgramRow[]>([])
-const query = ref("")
+const { rows: programs, items, query, searchTerm, search, page, perPage, total, loading, load: getProgramData } = usePagedList<ProgramRow>({
+  api: "priorities",
+  map: (row, index) => {
+    const id = row.id ?? row.uuid
+    return {
+      id: typeof id === "string" || typeof id === "number" ? id : index,
+      title: typeof row.title === "string" ? row.title : "",
+      description: typeof row.description === "string" ? row.description : typeof row.text === "string" ? row.text : "",
+      icon: typeof row.icon === "string" ? row.icon : "",
+      active: readActive(row),
+    }
+  },
+  filter: (item, term) => [item.title, item.description].some(value => value.toLowerCase().includes(term)),
+})
+const emptyText = computed(() => {
+  if (loading.value) return "Loading programs…"
+  return searchTerm.value ? "No programs match that search." : "No programs yet."
+})
 const open = ref(false)
 const selected = ref<ProgramRow | null>(null)
 const columns = [
@@ -46,14 +66,6 @@ const columns = [
   { key: "description", label: "Description", truncate: true },
   { key: "active", label: "Active", kind: "status" as const },
 ]
-const filteredPrograms = computed(() => {
-  const term = query.value.trim().toLowerCase()
-  if (!term) return programs.value
-  return programs.value.filter(item =>
-    [item.title, item.description].some(value => String(value || "").toLowerCase().includes(term)),
-  )
-})
-
 function readActive(row: Record<string, unknown>) {
   const value = row.is_active ?? row.active ?? row.published ?? row.status
   if (typeof value === "boolean") return value
@@ -89,25 +101,4 @@ function deleteProgram(id: string | number) {
     })
 }
 
-function getProgramData() {
-  GET_API({
-    api: "priorities",
-  }).then((res) => {
-    const rows = Array.isArray(res.data.data) ? res.data.data : []
-    programs.value = rows.map((row: Record<string, unknown>, index: number) => {
-      const id = row.id ?? row.uuid
-      return {
-        id: typeof id === "string" || typeof id === "number" ? id : index,
-        title: typeof row.title === "string" ? row.title : "",
-        description: typeof row.description === "string" ? row.description : typeof row.text === "string" ? row.text : "",
-        icon: typeof row.icon === "string" ? row.icon : "",
-        active: readActive(row),
-      }
-    })
-  })
-}
-
-onMounted(() => {
-  getProgramData()
-})
 </script>

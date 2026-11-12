@@ -8,17 +8,6 @@
         <h2 class="font-serif text-4xl font-medium text-neutral-950 sm:text-5xl">
           Explore the initiatives
         </h2>
-        <label class="w-full max-w-[11rem] text-[11px] text-neutral-500 lg:mb-1">
-          Sort by
-          <select
-            v-model="sort"
-            class="mt-1 w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 outline-none"
-          >
-            <option value="featured">Featured</option>
-            <option value="title">Title</option>
-            <option value="category">Category</option>
-          </select>
-        </label>
       </div>
 
       <label class="mt-6 block max-w-xl">
@@ -31,8 +20,10 @@
           <input
             v-model="query"
             type="search"
+            enterkeyhint="search"
             placeholder="Search programs, initiatives, or keywords..."
             class="w-full bg-transparent text-sm text-neutral-800 outline-none placeholder:text-neutral-400"
+            @keydown.enter.prevent="search"
           >
         </span>
       </label>
@@ -40,43 +31,62 @@
       <div class="mt-5 flex gap-1 overflow-x-auto pb-1">
         <button
           v-for="item in categories"
-          :key="item"
+          :key="item.uuid || item.name"
           type="button"
           class="shrink-0 px-3.5 py-2 text-[13px] whitespace-nowrap"
-          :class="category === item ? 'bg-[#1a3328] text-white' : 'text-neutral-700 hover:text-neutral-950'"
-          @click="category = item"
+          :class="milestoneUuid === item.uuid ? 'bg-[#1a3328] text-white' : 'text-neutral-700 hover:text-neutral-950'"
+          :aria-pressed="milestoneUuid === item.uuid"
+          @click="selectCategory(item)"
         >
-          {{ item }}
+          {{ item.name }}
         </button>
       </div>
 
-      <div class="mt-8 flex flex-col gap-2 text-[13px] text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
-        <p>{{ filtered.length }} programs to explore</p>
-        
+      <div class="mt-8 text-[13px] text-neutral-500">
+        <p v-if="loading">Loading programs…</p>
+        <p v-else>{{ total }} {{ total === 1 ? "program" : "programs" }} to explore</p>
       </div>
 
-      <div v-if="visible.length" class="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div v-if="loading" class="mt-5 grid animate-pulse gap-5 md:grid-cols-2 xl:grid-cols-3" aria-busy="true">
+        <div v-for="index in 3" :key="index" class="border border-neutral-200">
+          <div class="aspect-[16/10] bg-neutral-100" />
+          <div class="bg-[#eef1ec] px-5 py-4">
+            <div class="h-2.5 w-24 bg-[#dfe4dc]" />
+          </div>
+          <div class="px-5 py-5">
+            <div class="h-6 w-4/5 bg-neutral-200" />
+            <div class="mt-4 h-3 w-full bg-neutral-100" />
+            <div class="mt-2 h-3 w-5/6 bg-neutral-100" />
+          </div>
+        </div>
+      </div>
+
+      <div v-else-if="programs.length" class="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         <article
-          v-for="program in visible"
-          :key="program.title"
-          class="flex flex-col border border-neutral-200 bg-white"
+          v-for="program in programs"
+          :key="program.id"
+          class="flex flex-col overflow-hidden border border-neutral-200 bg-white"
         >
-          <div class="flex items-center justify-between bg-[#eef1ec] px-5 py-4 text-neutral-700">
-            <Icon v-if="program.icon !== 'leaf'" :name="program.icon" size="1.45rem" aria-hidden="true" />
-            <svg v-else viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-              <path d="M5 19c7.5-.8 12-7.2 14-14-6.2 1.6-12.4 5.6-14 14Z" stroke-linejoin="round" />
-              <path d="M9.5 14.5c1.8-2 3.8-4.4 6-7" stroke-linecap="round" />
-            </svg>
+          <div class="aspect-[16/10] overflow-hidden bg-[#eef1ec]">
+            <img
+              v-if="program.image"
+              :src="program.image"
+              :alt="program.title"
+              class="h-full w-full object-cover"
+              loading="lazy"
+            >
+            <div v-else class="flex h-full w-full items-center justify-center text-[#9aa79e]">
+              <Icon name="heroicons:photo" size="2.5rem" aria-hidden="true" />
+            </div>
+          </div>
+          <div class="border-t border-neutral-200 bg-[#eef1ec] px-5 py-4 text-neutral-700">
             <p class="text-[11px] font-medium uppercase tracking-[0.14em]">{{ program.category }}</p>
           </div>
           <div class="flex flex-1 flex-col px-5 py-5">
-            <p class="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">
-              Sample content
-            </p>
-            <h3 class="mt-2 font-serif text-[1.65rem] leading-tight font-medium text-neutral-950">
+            <h3 class="font-serif text-[1.65rem] leading-tight font-medium text-neutral-950">
               {{ program.title }}
             </h3>
-            <p class="mt-2 flex-1 text-sm leading-relaxed text-neutral-600">
+            <p class="mt-2 line-clamp-4 flex-1 text-sm leading-relaxed text-neutral-600" :title="program.detail">
               {{ program.detail }}
             </p>
             <NuxtLink
@@ -89,11 +99,29 @@
           </div>
         </article>
       </div>
-      <p v-else class="mt-8 text-sm text-neutral-500">
-        No programs match your search.
-      </p>
+      <EmptyState
+        v-else-if="searchTerm"
+        class="mt-5"
+        icon="heroicons:magnifying-glass"
+        title="No programs match your search"
+        text="Try a different word, or clear the search to see every program."
+      />
+      <EmptyState
+        v-else-if="milestoneUuid"
+        class="mt-5"
+        icon="heroicons:light-bulb"
+        :title="`No ${category} programs yet`"
+        text="Programs under this milestone will appear here soon. Choose another milestone to keep exploring."
+      />
+      <EmptyState
+        v-else
+        class="mt-5"
+        icon="heroicons:light-bulb"
+        title="Programs are on the way"
+        text="Programs and initiatives for every Filipino will be listed here soon."
+      />
 
-      <nav class="mt-8 flex items-center justify-center gap-2" aria-label="Program pages">
+      <nav v-if="pageCount > 1" class="mt-8 flex items-center justify-center gap-2" aria-label="Program pages">
         <button
           type="button"
           class="inline-flex h-9 w-9 items-center justify-center border border-neutral-300 text-neutral-700 disabled:text-neutral-300"
@@ -128,93 +156,103 @@
 </template>
 
 <script setup lang="ts">
-const categories = [
-  "All initiatives",
-  "Education",
-  "Health",
-  "Social Services",
-  "Economy & Jobs",
-  "Infrastructure",
-  "Peace & Security",
-  "Disaster Preparedness",
-]
+import EmptyState from "~/components/EmptyState.vue"
 
-const programs = [
-  {
-    icon: "heroicons:chart-bar",
-    category: "Economy & Jobs",
-    title: "Mag Negosyo Ta 'Day",
-    detail: "Livelihood initiative referenced in historical OVP reporting. Supports micro and small enterprises through training and access to opportunities.",
-  },
-  {
-    icon: "heroicons:academic-cap",
-    category: "Education",
-    title: "PagbaBAGo: A Million Learners",
-    detail: "Learner-support initiative with school supply distribution and educational assistance activities.",
-  },
-  {
-    icon: "leaf",
-    category: "Environment & Climate",
-    title: "PagbaBAGo: A Million Trees",
-    detail: "Tree-planting and environmental outreach initiative for greener and more resilient communities.",
-  },
-  {
-    icon: "heroicons:user-group",
-    category: "Social Services",
-    title: "Libreng Sakay",
-    detail: "Transportation support initiative documented in OVP reporting, aimed at assisting commuters and vulnerable sectors.",
-  },
-  {
-    icon: "heroicons:heart",
-    category: "Social Services",
-    title: "Community Food Outreach",
-    detail: "Food assistance and community outreach activities to support families and vulnerable groups.",
-  },
-  {
-    icon: "heroicons:shield-check",
-    category: "Disaster Preparedness",
-    title: "Disaster Response Activities",
-    detail: "Relief and emergency response activities during natural disasters and other emergencies.",
-  },
-]
+type Milestone = {
+  uuid: string
+  name: string
+}
 
-const query = ref("")
-const category = ref("All initiatives")
-const sort = ref("featured")
-const page = ref(1)
-const pageSize = 6
+type MilestoneRecord = {
+  uuid?: string
+  year?: string | number | null
+  title?: string
+  for?: string
+}
 
-const filtered = computed(() => {
-  const term = query.value.trim().toLowerCase()
-  const list = programs.filter((program) => {
-    const matchesCategory = category.value === "All initiatives" || program.category === category.value
-    const matchesQuery = !term || [program.title, program.detail, program.category].some(value => value.toLowerCase().includes(term))
-    return matchesCategory && matchesQuery
-  })
+const allPrograms = "All programs"
+const { GET_API } = useGlobalStore()
+const milestones = ref<Milestone[]>([])
+const categories = computed<Milestone[]>(() => [{ uuid: "", name: allPrograms }, ...milestones.value])
 
-  if (sort.value === "title") {
-    return [...list].sort((a, b) => a.title.localeCompare(b.title))
-  }
+function milestoneName(record: MilestoneRecord | null | undefined) {
+  const title = record?.title?.trim() ?? ""
+  const year = record?.year ? String(record.year) : ""
+  return [title, year].filter(Boolean).join(" · ")
+}
 
-  if (sort.value === "category") {
-    return [...list].sort((a, b) => a.category.localeCompare(b.category))
-  }
+function getMilestones() {
+  GET_API({ api: "public/milestones", per_page: 100 })
+    .then((response) => {
+      const rows = Array.isArray(response.data?.data) ? response.data.data as MilestoneRecord[] : []
+      milestones.value = rows.flatMap((row) => {
+        const name = milestoneName(row)
+        if (!row.uuid || !name || row.for?.toLowerCase() !== "home") return []
+        return [{ uuid: row.uuid, name }]
+      })
+    })
+    .catch((error: unknown) => {
+      console.error("Error fetching milestones:", error)
+    })
+}
 
-  return list
+type Program = {
+  id: string
+  image: string
+  category: string
+  title: string
+  detail: string
+}
+
+type ProgramRecord = {
+  uuid?: string
+  milestone?: MilestoneRecord | null
+  title?: string
+  description?: string
+  file_path?: string | null
+}
+
+const storageUrl = String(useRuntimeConfig().public.storageUrl || "")
+
+function storageSrc(path: string) {
+  if (!path) return ""
+  if (/^(https?:|data:|blob:)/i.test(path)) return path
+  return `${storageUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`
+}
+
+const category = ref(allPrograms)
+const milestoneUuid = ref("")
+
+const { rows: programs, query, searchTerm, page, perPage, total, loading, reset, search } = usePagedList<Program>({
+  api: "public/programs",
+  perPage: 6,
+  params: () => (milestoneUuid.value ? { milestone_uuid: milestoneUuid.value } : {}),
+  map: (row, index) => {
+    const record = row as ProgramRecord
+    return {
+      id: record.uuid || `program-${index}`,
+      image: storageSrc(record.file_path?.trim() ?? ""),
+      category: milestoneName(record.milestone),
+      title: record.title ?? "",
+      detail: record.description?.trim() ?? "",
+    }
+  },
 })
 
-const pageCount = computed(() => Math.max(1, Math.ceil(filtered.value.length / pageSize)))
+const pageCount = computed(() => Math.max(1, Math.ceil(total.value / perPage.value)))
 
-const visible = computed(() => {
-  const start = (page.value - 1) * pageSize
-  return filtered.value.slice(start, start + pageSize)
-})
-
-watch([query, category, sort], () => {
-  page.value = 1
-})
+function selectCategory(item: Milestone) {
+  if (milestoneUuid.value === item.uuid) return
+  category.value = item.name
+  milestoneUuid.value = item.uuid
+  reset()
+}
 
 watch(pageCount, (count) => {
   if (page.value > count) page.value = count
+})
+
+onMounted(() => {
+  getMilestones()
 })
 </script>

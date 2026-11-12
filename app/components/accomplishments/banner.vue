@@ -12,9 +12,7 @@
         <p class="mt-5 max-w-lg text-sm leading-relaxed text-neutral-600 sm:text-[15px]">
           A closer look at public-service records—with the context, reporting periods, and sources that inform these numbers. This section brings together key initiatives, achievements, and related documents across offices and programs.
         </p>
-        <p class="mt-8 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-400">
-          Sample figures · Supporting sources pending
-        </p>
+  
       </div>
     </div>
 
