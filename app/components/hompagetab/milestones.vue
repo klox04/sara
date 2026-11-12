@@ -13,15 +13,19 @@
     <div class="p-5">
       <Field
         v-model="query"
+        @keydown.enter.prevent="search"
         placeholder="Search milestone..."
         class="max-w-md"
       />
 
       <Table
+        v-model:page="page"
+        v-model:per-page="perPage"
         class="mt-4"
         :columns="columns"
         :items="tableItems"
-        :empty-text="query.trim() ? 'No milestones match that search.' : 'No milestones yet.'"
+        :total="total"
+        :empty-text="emptyText"
         @edit="editMilestone"
         @delete="deleteMilestone"
       />
@@ -37,6 +41,7 @@ type Milestone = {
   id: string | number
   year: string
   image: string
+  icon: string
   title: string
   organization: string
   period: string
@@ -54,21 +59,36 @@ const forLabels: Record<MilestoneFor, string> = {
   about: "About",
 }
 
-const { GET_API, POST_API, PATCH_API, DELETE_API } = useGlobalStore()
+const { POST_API, PATCH_API, DELETE_API } = useGlobalStore()
 const { toast } = useToast()
 const storageUrl = String(useRuntimeConfig().public.storageUrl || "").replace(/\/$/, "")
 
-const milestones = ref<Milestone[]>([])
-const query = ref("")
+const { rows: milestones, items, query, searchTerm, search, page, perPage, total, offset, loading, load: getMilestones } = usePagedList<Milestone>({
+  api: "milestones",
+  map: (row, index) => ({
+    id: readText(row.uuid) || readText(row.id) || index,
+    year: readText(row.year),
+    image: readText(row.file_path || row.image),
+    icon: readText(row.icon),
+    title: readText(row.title),
+    organization: readText(row.organization),
+    period: readText(row.period_label),
+    description: readText(row.description),
+    for: readFor(row.for),
+    active: readActive(row.is_active),
+  }),
+  filter: (item, term) => [item.year, item.title, item.organization, item.period, item.description, item.for ? forLabels[item.for] : ""]
+    .some(value => value.toLowerCase().includes(term)),
+})
 const open = ref(false)
 const selected = ref<Milestone | null>(null)
 
 const columns = [
   { key: "number", label: "#" },
   { key: "year", label: "Year" },
-  { key: "image", label: "Image", kind: "icon" as const },
-  { key: "title", label: "Title", strong: true },
-  { key: "organization", label: "Organization" },
+  { key: "visual", label: "Image / Icon", kind: "icon" as const },
+  { key: "title", label: "Government Position", strong: true },
+  { key: "organization", label: "Location" },
   { key: "period", label: "Period Label" },
   { key: "description", label: "Description", truncate: true },
   {
@@ -83,19 +103,19 @@ const columns = [
   { key: "active", label: "Status", kind: "status" as const },
 ]
 
-const tableItems = computed(() => {
-  const numbered = milestones.value.map((item, index) => ({
-    ...item,
-    number: index + 1,
-    shownOn: item.for ? forLabels[item.for] : "—",
-  }))
-  const term = query.value.trim().toLowerCase()
-  if (!term) return numbered
-  return numbered.filter(item =>
-    [item.year, item.title, item.organization, item.period, item.description, item.shownOn]
-      .some(value => value.toLowerCase().includes(term)),
-  )
+const emptyText = computed(() => {
+  if (loading.value) return "Loading milestones…"
+  return searchTerm.value ? "No milestones match that search." : "No milestones yet."
 })
+
+const tableItems = computed(() => [...items.value]
+  .sort((a, b) => Number(a.year || 0) - Number(b.year || 0))
+  .map((item, index) => ({
+    ...item,
+    number: offset.value + index + 1,
+    visual: item.for === "about" ? item.icon : item.image,
+    shownOn: item.for ? forLabels[item.for] : "—",
+  })))
 
 function readText(value: unknown) {
   return typeof value === "string" || typeof value === "number" ? String(value) : ""
@@ -136,7 +156,8 @@ function readError(error: unknown, fallback: string) {
 function saveMilestone(milestone: MilestoneForm) {
   const payload = {
     year: milestone.year,
-    file_path: relativeFilePath(milestone.image),
+    file_path: milestone.for === "about" ? null : relativeFilePath(milestone.image),
+    icon: milestone.for === "about" ? milestone.icon : null,
     title: milestone.title,
     organization: milestone.organization,
     period_label: milestone.period || null,
@@ -169,30 +190,4 @@ function deleteMilestone(id: string | number) {
     })
 }
 
-function getMilestones() {
-  GET_API({ api: "milestones" })
-    .then((response) => {
-      const rows = Array.isArray(response.data?.data) ? response.data.data as Record<string, unknown>[] : []
-      milestones.value = [...rows]
-        .sort((a, b) => Number(a.year ?? 0) - Number(b.year ?? 0))
-        .map((row, index) => ({
-          id: readText(row.uuid) || readText(row.id) || index,
-          year: readText(row.year),
-          image: readText(row.file_path || row.image),
-          title: readText(row.title),
-          organization: readText(row.organization),
-          period: readText(row.period_label),
-          description: readText(row.description),
-          for: readFor(row.for),
-          active: readActive(row.is_active),
-        }))
-    })
-    .catch(() => {
-      milestones.value = []
-    })
-}
-
-onMounted(() => {
-  getMilestones()
-})
 </script>

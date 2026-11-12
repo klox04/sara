@@ -3,9 +3,9 @@
     <AboutBanner :banner="banner" :loading="loading" />
     <AboutBiography :paragraphs="biography" :roles="roles" :loading="loading" />
     <AboutFoundations :programs="programs" :loading="loading" />
-    <AboutTimeline :stops="timeline" :loading="loading" />
-    <AboutAreas />
-    <AboutRecords />
+    <!-- <AboutTimeline :stops="timeline" :loading="loading" /> -->
+    <AboutAreas :areas="areas" :loading="loading" />
+    <AboutRecords :records="records" :loading="loading" />
   </main>
 </template>
 
@@ -16,7 +16,17 @@ import AboutFoundations from "~/components/about/foundations.vue"
 import AboutTimeline from "~/components/about/timeline.vue"
 import AboutAreas from "~/components/about/areas.vue"
 import AboutRecords from "~/components/about/records.vue"
-import type { AboutBanner as AboutBannerData, AboutProgram, AboutRole, AboutTimelineStop } from "~/types/about"
+import type { AboutArea, AboutBanner as AboutBannerData, AboutProgram, AboutRecordItem, AboutRole, AboutTimelineStop } from "~/types/about"
+
+type PublicRecord = {
+  uuid?: string
+  title?: string
+  description?: string
+  record_date?: string | null
+  category?: { name?: string, icon?: string | null } | null
+  institution?: { name?: string } | null
+  type?: { name?: string } | null
+}
 
 type ProgramRecord = {
   uuid?: string
@@ -37,6 +47,7 @@ type MilestoneRecord = {
   uuid?: string
   year?: number | string
   file_path?: string
+  icon?: string | null
   title?: string
   organization?: string
   period_label?: string | null
@@ -53,6 +64,13 @@ const biography = ref<string[]>([])
 const roles = ref<AboutRole[]>([])
 const programs = ref<AboutProgram[]>([])
 const timeline = ref<AboutTimelineStop[]>([])
+const areas = ref<AboutArea[]>([])
+const records = ref<AboutRecordItem[]>([])
+
+function categoryIcon(record: PublicRecord) {
+  const icon = record.category?.icon ?? ""
+  return icon.includes(":") ? icon : "heroicons:document-text"
+}
 
 function storageSrc(path: string) {
   if (!path) return ""
@@ -89,7 +107,7 @@ function applyRoles(records: MilestoneRecord[]) {
         title: record.title ?? "",
         meta: [period, record.organization?.trim()].filter(Boolean).join(" · "),
         detail: record.description?.trim() ?? "",
-        icon: "heroicons:building-library",
+        icon: record.icon && record.icon.includes(":") ? record.icon : "heroicons:building-library",
       }
     })
 }
@@ -101,7 +119,7 @@ function applyTimeline(records: MilestoneRecord[]) {
     .map((record, index) => ({
       id: record.uuid || `stop-${index}`,
       year: record.year ? String(record.year) : "",
-      icon: "heroicons:building-library",
+      icon: record.icon && record.icon.includes(":") ? record.icon : "heroicons:building-library",
       title: record.title ?? "",
       place: record.organization?.trim() ?? "",
       years: record.period_label?.trim() ?? "",
@@ -121,6 +139,33 @@ function applyPrograms(records: ProgramRecord[]) {
     }))
 }
 
+function applyAreas(records: PublicRecord[]) {
+  areas.value = records
+    .filter(record => record.title)
+    .map((record, index) => ({
+      id: record.uuid || `record-${index}`,
+      icon: categoryIcon(record),
+      category: record.category?.name ?? "",
+      title: record.title ?? "",
+      detail: record.description?.trim() ?? "",
+    }))
+}
+
+function applyRecords(list: PublicRecord[]) {
+  records.value = list
+    .filter(record => record.title)
+    .map((record, index) => {
+      const year = record.record_date?.slice(0, 4) ?? ""
+      return {
+        id: record.uuid || `archive-record-${index}`,
+        icon: categoryIcon(record),
+        meta: [record.type?.name, year, record.institution?.name].filter(Boolean).join(" · "),
+        title: record.title ?? "",
+        detail: record.description?.trim() ?? "",
+      }
+    })
+}
+
 function getAboutData() {
   GET_API({ api: "public/about" })
     .then((response) => {
@@ -132,6 +177,8 @@ function getAboutData() {
         applyTimeline(data.milestones)
       }
       if (Array.isArray(data?.programs)) applyPrograms(data.programs)
+      if (Array.isArray(data?.featured_records)) applyAreas(data.featured_records)
+      if (Array.isArray(data?.records)) applyRecords(data.records)
     })
     .catch((error: unknown) => {
       console.error("Error fetching about data:", error)

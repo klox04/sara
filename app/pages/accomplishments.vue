@@ -2,7 +2,7 @@
   <main>
     <AccomplishmentsBanner />
     <AccomplishmentsRecords />
-    <AccomplishmentsNote />
+    <!-- <AccomplishmentsNote /> -->
     <AccomplishmentsSources />
   </main>
 </template>

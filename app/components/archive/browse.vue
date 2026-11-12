@@ -5,14 +5,14 @@
         <h2 class="whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.14em] sm:text-[12px] sm:tracking-[0.2em]">
           Browse by type
         </h2>
-        <button
+        <!-- <button
           type="button"
           class="inline-flex items-center gap-1.5 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.1em] text-neutral-800 hover:text-forest sm:gap-2 sm:text-[11px] sm:tracking-[0.14em]"
           @click="showType('')"
         >
           View all types
           <Icon name="heroicons:arrow-right" size="0.9rem" aria-hidden="true" />
-        </button>
+        </button> -->
       </div>
 
       <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

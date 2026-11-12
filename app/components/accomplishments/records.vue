@@ -10,9 +10,7 @@
             Key initiatives &amp; milestones
           </h2>
         </div>
-        <p class="max-w-sm text-sm leading-relaxed text-neutral-500 lg:text-right">
-          Explore illustrative records by office, program, or initiative. Sample figures are not verified business data; refer to the sources and documents for full context, definitions, and reporting periods.
-        </p>
+
       </div>
 
       <div class="mt-8 flex flex-col gap-4 lg:flex-row lg:items-end">

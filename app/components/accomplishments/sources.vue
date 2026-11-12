@@ -31,9 +31,9 @@
           <div class="min-w-0 flex-1">
             <p class="flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400">
               {{ record.meta }}
-              <span class="border border-neutral-300 px-1.5 py-0.5 text-[10px] tracking-[0.12em] text-neutral-500">
+              <!-- <span class="border border-neutral-300 px-1.5 py-0.5 text-[10px] tracking-[0.12em] text-neutral-500">
                 Sample content
-              </span>
+              </span> -->
             </p>
             <h3 class="mt-1 text-base font-medium text-neutral-950">
               {{ record.title }}

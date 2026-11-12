@@ -16,6 +16,22 @@ export interface AboutTimelineStop {
   detail: string
 }
 
+export interface AboutRecordItem {
+  id: string
+  icon: string
+  meta: string
+  title: string
+  detail: string
+}
+
+export interface AboutArea {
+  id: string
+  icon: string
+  category: string
+  title: string
+  detail: string
+}
+
 export interface AboutProgram {
   id: string
   initiative: string

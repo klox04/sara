@@ -25,7 +25,6 @@
     </div>
 
     <Biography v-if="tab === 'biography'" v-model:dirty="dirty" class="mt-6" />
-    <Featured v-else-if="tab === 'featured'" class="mt-6" />
     <Banner v-else v-model:dirty="dirty" class="mt-6" />
 
     <DiscardDialog
@@ -39,15 +38,13 @@
 <script setup lang="ts">
 import Banner from "~/components/abouttab/banner.vue"
 import Biography from "~/components/abouttab/biography.vue"
-import Featured from "~/components/abouttab/featured.vue"
 import DiscardDialog from "~/components/dialog/discarddialog.vue"
 
-type Tab = "banner" | "biography" | "featured"
+type Tab = "banner" | "biography"
 
 const tabs: { value: Tab, label: string, icon: string }[] = [
   { value: "banner", label: "Banner", icon: "heroicons:photo" },
   { value: "biography", label: "Biography", icon: "heroicons:document-text" },
-  { value: "featured", label: "Featured", icon: "heroicons:star" },
 ]
 
 const tab = ref<Tab>("banner")

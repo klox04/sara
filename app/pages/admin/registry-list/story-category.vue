@@ -24,14 +24,18 @@
       <div class="p-5">
         <Field
           v-model="query"
+          @keydown.enter.prevent="search"
           placeholder="Search category..."
           class="max-w-md"
         />
 
         <Table
+          v-model:page="page"
+          v-model:per-page="perPage"
           class="mt-4"
           :columns="columns"
           :items="tableItems"
+          :total="total"
           :empty-text="emptyText"
           min-width="min-w-[36rem]"
           @edit="editCategory"
@@ -53,12 +57,18 @@ type CategoryRow = {
   added: string
 }
 
-const { GET_API, DELETE_API } = useGlobalStore()
+const { DELETE_API } = useGlobalStore()
 const { toast } = useToast()
 
-const categories = ref<CategoryRow[]>([])
-const query = ref("")
-const loading = ref(true)
+const { rows: categories, items, query, searchTerm, search, page, perPage, total, offset, loading, load: getCategories } = usePagedList<CategoryRow>({
+  api: "categories",
+  map: (row, index) => ({
+    id: readText(row.uuid) || (typeof row.id === "number" ? row.id : index),
+    name: readText(row.name),
+    added: formatDate(readText(row.created_at)),
+  }),
+  filter: (item, term) => item.name.toLowerCase().includes(term),
+})
 const open = ref(false)
 const selected = ref<CategoryRow | null>(null)
 
@@ -70,15 +80,10 @@ const columns = [
 
 const emptyText = computed(() => {
   if (loading.value) return "Loading categories…"
-  return query.value.trim() ? "No categories match that search." : "No categories yet."
+  return searchTerm.value ? "No categories match that search." : "No categories yet."
 })
 
-const tableItems = computed(() => {
-  const numbered = categories.value.map((item, index) => ({ ...item, number: index + 1 }))
-  const term = query.value.trim().toLowerCase()
-  if (!term) return numbered
-  return numbered.filter(item => item.name.toLowerCase().includes(term))
-})
+const tableItems = computed(() => items.value.map((item, index) => ({ ...item, number: offset.value + index + 1 })))
 
 function readText(value: unknown) {
   return typeof value === "string" ? value : ""
@@ -112,26 +117,4 @@ function deleteCategory(id: string | number) {
     })
 }
 
-function getCategories() {
-  loading.value = true
-  GET_API({ api: "categories" })
-    .then((response) => {
-      const rows = Array.isArray(response.data?.data) ? response.data.data as Record<string, unknown>[] : []
-      categories.value = rows.map((row, index) => ({
-        id: readText(row.uuid) || (typeof row.id === "number" ? row.id : index),
-        name: readText(row.name),
-        added: formatDate(readText(row.created_at)),
-      }))
-    })
-    .catch(() => {
-      categories.value = []
-    })
-    .finally(() => {
-      loading.value = false
-    })
-}
-
-onMounted(() => {
-  getCategories()
-})
 </script>

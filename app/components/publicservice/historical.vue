@@ -20,8 +20,24 @@
         </NuxtLink>
       </div>
 
-      <ul class="divide-y divide-neutral-300 border-neutral-300 lg:border-l lg:pl-12">
-        <li v-for="item in records" :key="item.title">
+      <ul
+        v-if="loading"
+        class="animate-pulse divide-y divide-neutral-300 border-neutral-300 lg:border-l lg:pl-12"
+        aria-busy="true"
+      >
+        <li v-for="index in 2" :key="index" class="flex items-center gap-6 py-6">
+          <span class="min-w-0 flex-1">
+            <span class="block h-2.5 w-28 bg-neutral-300/70" />
+            <span class="mt-3 block h-7 w-3/5 bg-neutral-300/70" />
+            <span class="mt-3 block h-3 w-full bg-neutral-200" />
+            <span class="mt-2 block h-3 w-4/5 bg-neutral-200" />
+          </span>
+          <span class="size-4 shrink-0 bg-neutral-300/70" />
+        </li>
+      </ul>
+
+      <ul v-else-if="records.length" class="divide-y divide-neutral-300 border-neutral-300 lg:border-l lg:pl-12">
+        <li v-for="item in records" :key="item.id">
           <NuxtLink
             to="/archive"
             class="group flex items-center gap-6 py-6"
@@ -33,7 +49,7 @@
               <span class="mt-2 block font-serif text-3xl font-medium text-neutral-950">
                 {{ item.title }}
               </span>
-              <span class="mt-2 block text-sm leading-relaxed text-neutral-600">
+              <span v-if="item.detail" class="mt-2 line-clamp-3 block text-sm leading-relaxed text-neutral-600">
                 {{ item.detail }}
               </span>
             </span>
@@ -41,21 +57,60 @@
           </NuxtLink>
         </li>
       </ul>
+
+      <EmptyState
+        v-else
+        icon="heroicons:archive-box"
+        title="Historical initiatives are on the way"
+        text="Featured past programs will be listed here soon."
+      />
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-const records = [
-  {
-    meta: "OVP · Sample overview",
-    title: "Libreng Sakay",
-    detail: "Transportation support initiative documented in OVP reporting.",
-  },
-  {
-    meta: "OVP · Sample overview",
-    title: "Community Food Outreach",
-    detail: "Illustrative overview card for food and community outreach activities.",
-  },
-]
+import EmptyState from "~/components/EmptyState.vue"
+
+type HistoricalRecord = {
+  id: string
+  meta: string
+  title: string
+  detail: string
+}
+
+type ProgramRecord = {
+  uuid?: string
+  milestone?: { title?: string, year?: string | number | null } | null
+  title?: string
+  description?: string
+}
+
+const { GET_API } = useGlobalStore()
+const records = ref<HistoricalRecord[]>([])
+const loading = ref(true)
+
+function getRecords() {
+  loading.value = true
+  GET_API({ api: "public/programs", is_featured: true, per_page: 100 })
+    .then((response) => {
+      const rows = Array.isArray(response.data?.data) ? response.data.data as ProgramRecord[] : []
+      records.value = rows
+        .filter(row => row.title)
+        .map((row, index) => ({
+          id: row.uuid || `program-${index}`,
+          meta: ["OVP", row.milestone?.title?.trim(), row.milestone?.year ? String(row.milestone.year) : ""].filter(Boolean).join(" · "),
+          title: row.title ?? "",
+          detail: row.description?.trim() ?? "",
+        }))
+    })
+    .catch((error: unknown) => {
+      records.value = []
+      console.error("Error fetching featured programs:", error)
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
+onMounted(getRecords)
 </script>
