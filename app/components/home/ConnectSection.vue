@@ -11,36 +11,32 @@
 
       <div class="flex flex-col justify-center px-8 py-12 sm:px-12 lg:px-16 xl:px-20">
         <div class="max-w-xl">
-          <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-neutral-500">
-            Connect with Sara
+          <p class="text-[11px] font-medium uppercase tracking-[0.08em] text-[#8a6f5a]">
+            A space for your words
           </p>
-          <h2 class="mt-3 max-w-[22rem] font-serif text-4xl leading-[1.08] text-neutral-950 sm:max-w-none sm:text-5xl">
-            Invite. Share. Be Part of the Journey.
+          <h2 class="mt-8 text-3xl font-medium leading-tight text-neutral-950 sm:text-[2rem]">
+            Every Message Has a Meaning.
           </h2>
-          <p class="mt-4 max-w-md text-sm leading-relaxed text-neutral-600">
-            We welcome invitations, messages, and stories from individuals, organizations, and communities.
+          <p class="mt-4 text-[15px] leading-relaxed text-neutral-600 sm:text-base">
+            From simple greetings to heartfelt words, share what you wish to say. Selected messages may be shared with the community.
           </p>
 
-          <div class="mx-auto mt-10 w-full max-w-sm text-center">
-            <div class="flex items-center gap-4 text-neutral-800">
-              <span class="h-px flex-1 bg-neutral-300" aria-hidden="true" />
-              <Icon name="heroicons:envelope" size="1.65rem" aria-hidden="true" />
-              <span class="h-px flex-1 bg-neutral-300" aria-hidden="true" />
-            </div>
-            <h3 class="mt-6 text-lg font-semibold text-neutral-950">
-              Send a Message
+          <div class="mt-8 border-t border-neutral-200 pt-10 text-center">
+            <Icon name="heroicons:envelope" size="1.6rem" class="text-[#1d3b30]" aria-hidden="true" />
+            <h3 class="mt-4 text-xl font-semibold text-neutral-950">
+              Send Your Message
             </h3>
-            <p class="mt-2 text-sm text-neutral-600">
-              Share your thoughts and messages.
+            <p class="mt-3 text-[15px] text-neutral-600">
+              Have something to say? We'd love to hear from you.
             </p>
             <button
               type="button"
               aria-haspopup="dialog"
-              class="mt-5 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-800 hover:text-forest"
+              class="mt-5 inline-flex items-center gap-3 text-[13px] font-medium uppercase tracking-[0.04em] text-neutral-800 hover:text-forest"
               @click="messageOpen = true"
             >
               Send a message
-              <Icon name="heroicons:arrow-right" size="0.9rem" aria-hidden="true" />
+              <Icon name="heroicons:arrow-up-right" size="0.95rem" aria-hidden="true" />
             </button>
           </div>
         </div>

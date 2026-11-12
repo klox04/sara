@@ -35,7 +35,28 @@
           <p class="mt-2 whitespace-pre-line break-words text-[15px] leading-relaxed text-neutral-800">{{ message.message }}</p>
         </div>
 
-        <div class="flex justify-end border-t border-neutral-200 px-6 py-4">
+        <div class="flex flex-col gap-4 border-t border-neutral-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div v-if="message.active !== undefined" class="flex items-center gap-3">
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="message.active"
+              aria-label="Active"
+              class="relative h-6 w-11 shrink-0 rounded-full transition disabled:cursor-wait disabled:opacity-60"
+              :class="message.active ? 'bg-[#1f7a4d]' : 'bg-neutral-300'"
+              :disabled="saving"
+              @click="emit('update:active', !message.active)"
+            >
+              <span
+                class="absolute top-0.5 size-5 rounded-full bg-white shadow transition-all"
+                :class="message.active ? 'left-5' : 'left-0.5'"
+              />
+            </button>
+            <span>
+              <span class="block text-sm font-semibold text-neutral-900">{{ saving ? "Saving…" : message.active ? "Active" : "Inactive" }}</span>
+              <span class="block text-xs text-neutral-500">Active messages can appear on the website.</span>
+            </span>
+          </div>
           <button
             type="button"
             class="rounded-lg border border-neutral-300 bg-white px-5 py-2.5 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
@@ -50,8 +71,13 @@
 </template>
 
 <script setup lang="ts">
-const { message } = defineProps<{
-  message: { name: string, message: string, received: string } | null
+const { message, saving = false } = defineProps<{
+  message: { name: string, message: string, received: string, active?: boolean } | null
+  saving?: boolean
+}>()
+
+const emit = defineEmits<{
+  "update:active": [active: boolean]
 }>()
 
 const open = defineModel<boolean>("open", { default: false })

@@ -24,8 +24,6 @@ const isLogin = computed(() => route.path === "/admin")
 const navOpen = ref(false)
 const items = [
   { title: "Homepage", href: "/admin/banners", action: "heroicons:photo" },
-  { title: "Stories", href: "/admin/stories", action: "heroicons:book-open" },
-  { title: "Messages", href: "/admin/messages", action: "heroicons:envelope" },
   { title: "About", href: "/admin/about", action: "heroicons:user" },
   { title: "Public Service", href: "/admin/public-service", action: "heroicons:squares-2x2" },
   { title: "Accomplishments", href: "/admin/accomplishments", action: "heroicons:trophy" },
@@ -45,7 +43,8 @@ const items = [
       { title: "Initiatives", href: "/admin/registry-list/initiatives" },
       { title: "Institutions", href: "/admin/registry-list/institutions" },
     ],
-  },]
+  },
+]
 
 async function signOut() {
   const failure = await navigateTo("/admin")

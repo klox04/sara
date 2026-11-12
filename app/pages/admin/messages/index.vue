@@ -41,7 +41,12 @@
       </div>
     </div>
 
-    <MessageViewDialog v-model:open="viewOpen" :message="selected" />
+    <MessageViewDialog
+      v-model:open="viewOpen"
+      :message="selected"
+      :saving="statusSaving"
+      @update:active="updateStatus"
+    />
   </section>
 </template>
 
@@ -54,6 +59,7 @@ type MessageRow = {
   message: string
   received: string
   sortTime: number
+  active: boolean
 }
 
 const { rows: messages, items, query, searchTerm, search, page, perPage, total, loading, failed: loadFailed } = usePagedList<MessageRow>({
@@ -67,22 +73,46 @@ const { rows: messages, items, query, searchTerm, search, page, perPage, total, 
       message: readText(row.message),
       received: formatDate(createdAt),
       sortTime: new Date(createdAt).getTime() || 0,
+      active: readActive(row.is_active),
     }
   },
   filter: (item, term) => [item.name, item.message].some(value => value.toLowerCase().includes(term)),
 })
+const { PATCH_API } = useGlobalStore()
+const { toast } = useToast()
 const viewOpen = ref(false)
 const selected = ref<MessageRow | null>(null)
+const statusSaving = ref(false)
 
 function openMessage(id: string | number) {
   selected.value = messages.value.find(item => item.id === id) ?? null
   if (selected.value) viewOpen.value = true
 }
 
+function updateStatus(active: boolean) {
+  const current = selected.value
+  if (!current || statusSaving.value) return
+  statusSaving.value = true
+  PATCH_API({ api: `messages/${current.id}`, is_active: active })
+    .then(() => {
+      messages.value = messages.value.map(item => item.id === current.id ? { ...item, active } : item)
+      if (selected.value?.id === current.id) selected.value = { ...current, active }
+      toast("success", active ? "Message set to active." : "Message set to inactive.")
+    })
+    .catch((error: { response?: { data?: { message?: unknown } } }) => {
+      const message = error.response?.data?.message
+      toast("error", typeof message === "string" && message ? message : "The message status could not be updated.")
+    })
+    .finally(() => {
+      statusSaving.value = false
+    })
+}
+
 const columns = [
   { key: "name", label: "Name", strong: true, nowrap: true },
   { key: "message", label: "Message", truncate: true },
   { key: "received", label: "Date Received", nowrap: true },
+  { key: "active", label: "Status", kind: "status" as const },
 ]
 
 const emptyText = computed(() => {
@@ -95,6 +125,13 @@ const tableItems = computed(() => [...items.value].sort((a, b) => b.sortTime - a
 
 function readText(value: unknown) {
   return typeof value === "string" ? value : ""
+}
+
+function readActive(value: unknown) {
+  if (typeof value === "boolean") return value
+  if (typeof value === "number") return value === 1
+  if (typeof value === "string") return ["1", "true", "active"].includes(value.toLowerCase())
+  return true
 }
 
 function formatDate(value: string) {
