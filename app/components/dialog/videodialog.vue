@@ -26,7 +26,33 @@
           </button>
         </div>
 
-        <div class="relative mt-4 overflow-hidden rounded-xl bg-black sm:mt-6">
+        <div v-if="src && youtubeEmbed" class="mt-4 inline-flex rounded-full bg-neutral-100 p-1 sm:mt-6" role="tablist" aria-label="Video source">
+          <button
+            v-for="option in sourceOptions"
+            :key="option.value"
+            type="button"
+            role="tab"
+            :aria-selected="source === option.value"
+            class="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition"
+            :class="source === option.value ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-600 hover:text-neutral-900'"
+            @click="selectSource(option.value)"
+          >
+            <Icon :name="option.icon" size="1rem" aria-hidden="true" />
+            {{ option.label }}
+          </button>
+        </div>
+
+        <div v-if="source === 'youtube' && youtubeEmbed" class="mt-4 overflow-hidden rounded-xl bg-black" :class="src ? 'sm:mt-4' : 'sm:mt-6'">
+          <iframe
+            :src="youtubeEmbed"
+            :title="title || heading"
+            class="aspect-video w-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          />
+        </div>
+
+        <div v-else class="relative mt-4 overflow-hidden rounded-xl bg-black" :class="youtubeEmbed ? 'sm:mt-4' : 'sm:mt-6'">
           <video
             ref="player"
             :src="src"
@@ -73,8 +99,11 @@
 </template>
 
 <script setup lang="ts">
-const { src, poster, heading = "Watch Video", title, description } = defineProps<{
-  src: string
+type VideoSource = "file" | "youtube"
+
+const { src = "", youtubeUrl = "", poster, heading = "Watch Video", title, description } = defineProps<{
+  src?: string
+  youtubeUrl?: string
   poster?: string
   heading?: string
   title?: string
@@ -86,7 +115,21 @@ const closeButton = ref<HTMLButtonElement | null>(null)
 const player = ref<HTMLVideoElement | null>(null)
 const playing = ref(false)
 const started = ref(false)
+const source = ref<VideoSource>("file")
 let returnFocus: HTMLElement | null = null
+
+const youtubeEmbed = computed(() => (open.value ? youtubeEmbedUrl(youtubeUrl, { autoplay: true }) : ""))
+
+const sourceOptions: { value: VideoSource, label: string, icon: string }[] = [
+  { value: "file", label: "Video", icon: "heroicons:film" },
+  { value: "youtube", label: "YouTube", icon: "heroicons:play-circle" },
+]
+
+function selectSource(value: VideoSource) {
+  if (source.value === value) return
+  player.value?.pause()
+  source.value = value
+}
 
 function close() {
   open.value = false
@@ -102,6 +145,7 @@ function onKeydown(event: KeyboardEvent) {
 
 watch(open, async (isOpen) => {
   if (isOpen) {
+    source.value = src ? "file" : "youtube"
     returnFocus = document.activeElement as HTMLElement | null
     document.body.style.overflow = "hidden"
     await nextTick()

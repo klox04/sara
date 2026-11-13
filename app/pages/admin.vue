@@ -44,6 +44,7 @@ const items = [
       { title: "Institutions", href: "/admin/registry-list/institutions" },
     ],
   },
+  { title: "Settings", href: "/admin/settings", action: "heroicons:cog-6-tooth", section: "Developer" },
 ]
 
 async function signOut() {

@@ -31,6 +31,7 @@ type HeroRecord = {
   quote?: string
   file_path?: string
   video_file_path?: string | null
+  youtube_url?: string | null
 }
 
 type PriorityRecord = {
@@ -114,6 +115,7 @@ function applyHero(hero: HeroRecord) {
     body: hero.body ?? "",
     image: storageSrc(hero.file_path ?? ""),
     video: storageSrc(hero.video_file_path ?? ""),
+    youtubeUrl: youtubeVideoId(hero.youtube_url ?? "") ? hero.youtube_url?.trim() : "",
     quote: quote.text,
     quoteAuthor: quote.author,
     primaryLabel: "Explore Her Story",

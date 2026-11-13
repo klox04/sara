@@ -219,7 +219,7 @@ const gallery = computed(() => {
 })
 
 useHead({
-  title: () => gallery.value ? `${gallery.value.title} | Sara Duterte` : "Gallery | Sara Duterte",
+  title: () => gallery.value?.title || "Gallery",
 })
 
 function asRecord(value: unknown) {

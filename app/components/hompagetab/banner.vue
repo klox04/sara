@@ -213,6 +213,32 @@
         </div>
         <p v-if="fieldErrors.video_file_path" class="mt-2 text-sm text-red-600">{{ fieldErrors.video_file_path }}</p>
         <p v-else-if="videoError" class="mt-2 text-sm text-red-700">{{ videoError }}</p>
+
+        <div class="mt-5 flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.12em] text-neutral-400">
+          <span class="h-px flex-1 bg-neutral-200" aria-hidden="true" />
+          Or add a YouTube link
+          <span class="h-px flex-1 bg-neutral-200" aria-hidden="true" />
+        </div>
+        <Field
+          v-model="form.youtube_url"
+          class="mt-4"
+          label="YouTube URL"
+          placeholder="https://www.youtube.com/watch?v=..."
+          :error-messages="fieldErrors.youtube_url"
+          @update:model-value="clearFieldError('youtube_url')"
+        />
+        <div v-if="youtubeEmbed" class="mt-3 overflow-hidden rounded-xl border border-neutral-200 bg-black">
+          <iframe
+            :src="youtubeEmbed"
+            title="YouTube video preview"
+            class="aspect-video w-full"
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          />
+        </div>
+        <p v-else-if="form.youtube_url.trim() && !fieldErrors.youtube_url" class="mt-2 text-xs text-neutral-500">
+          Paste a full YouTube link to see a preview.
+        </p>
       </div>
     </div>
   </div>
@@ -231,6 +257,7 @@ const form = reactive({
   image: "",
   file_path: "",
   video_file_path: "",
+  youtube_url: "",
   uuid: "",
 })
 const fieldErrors = reactive<Record<string, string>>({})
@@ -257,6 +284,8 @@ function storageSrc(path: string) {
 
 const imagePreview = computed(() => preview.value || storageSrc(form.file_path || form.image))
 const videoSrc = computed(() => videoPreview.value || storageSrc(form.video_file_path))
+
+const youtubeEmbed = computed(() => youtubeEmbedUrl(form.youtube_url))
 
 function clearFieldError(key: string) {
   delete fieldErrors[key]
@@ -446,6 +475,7 @@ function getBannerData() {
       form.image = path
     }
     form.video_file_path = typeof record.video_file_path === "string" ? record.video_file_path : ""
+    form.youtube_url = typeof record.youtube_url === "string" ? record.youtube_url : ""
   })
 }
 
@@ -470,6 +500,12 @@ function SubmitBanner() {
     toast("error", "The banner could not be updated.")
     return
   }
+  const youtubeUrl = form.youtube_url.trim()
+  if (youtubeUrl && !youtubeEmbed.value) {
+    fieldErrors.youtube_url = "Enter a valid YouTube link."
+    toast("error", "Check the highlighted fields.")
+    return
+  }
   const payload = {
     name: form.name,
     headline: form.headline,
@@ -478,6 +514,7 @@ function SubmitBanner() {
     image: form.file_path || form.image,
     file_path: form.file_path,
     video_file_path: form.video_file_path || null,
+    youtube_url: youtubeUrl || null,
   }
   PATCH_API({
     api: `heroes/${form.uuid}`,

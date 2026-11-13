@@ -115,7 +115,7 @@ const related = computed<StoryPreview[]>(() => published.value
   })))
 
 useHead({
-  title: () => story.value ? `${story.value.title} | Sara Duterte` : "Story | Sara Duterte",
+  title: () => story.value?.title || "Story",
 })
 
 function getStories() {

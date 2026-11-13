@@ -71,7 +71,7 @@
           </NuxtLink>
 
           <button
-            v-if="banner.secondaryLabel && banner.video"
+            v-if="banner.secondaryLabel && hasVideo"
             type="button"
             aria-haspopup="dialog"
             class="inline-flex items-center justify-center gap-2.5 rounded-sm border border-white/85 px-5 py-3 text-[11px] font-medium uppercase tracking-[0.16em] text-white hover:bg-white/10 sm:justify-start"
@@ -100,9 +100,10 @@
     </div>
 
     <VideoDialog
-      v-if="banner.video"
+      v-if="hasVideo"
       v-model:open="videoOpen"
       :src="banner.video"
+      :youtube-url="banner.youtubeUrl"
       :poster="banner.image"
       :heading="banner.secondaryLabel"
       :title="banner.subtitle ? `${banner.name}: ${banner.subtitle}` : banner.name"
@@ -122,4 +123,5 @@ const { banner, loading = false } = defineProps<{
 }>()
 
 const videoOpen = ref(false)
+const hasVideo = computed(() => Boolean(banner?.video || banner?.youtubeUrl))
 </script>

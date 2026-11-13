@@ -14,16 +14,18 @@
       <p class="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-500">Admin</p>
     </div>
 
-    <p v-if="username" class="ml-auto hidden text-sm text-neutral-600 sm:block">
-      Signed in as {{ username }}
-    </p>
-    <button
-      type="button"
-      class="text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-700 hover:text-neutral-950"
-      @click="emit('sign-out')"
-    >
-      Sign out
-    </button>
+    <div class="ml-auto flex shrink-0 items-center gap-4">
+      <p v-if="username" class="hidden text-sm text-neutral-600 sm:block">
+        Signed in as {{ username }}
+      </p>
+      <button
+        type="button"
+        class="text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-700 hover:text-neutral-950"
+        @click="emit('sign-out')"
+      >
+        Sign out
+      </button>
+    </div>
   </header>
 </template>
 

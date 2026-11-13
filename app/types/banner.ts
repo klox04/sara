@@ -5,6 +5,7 @@ export interface Banner {
   image?: string
   imageAlt?: string
   video?: string
+  youtubeUrl?: string
   primaryLabel?: string
   primaryTo?: string
   secondaryLabel?: string

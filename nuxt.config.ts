@@ -12,9 +12,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: "Sara Duterte",
       link: [
-        { rel: "icon", type: "image/png", href: "/forest_eagle_mountain_icon.png" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         {
           rel: "preconnect",

@@ -178,7 +178,7 @@ const record = computed(() => {
 })
 
 useHead({
-  title: () => record.value ? `${record.value.title} | Sara Duterte` : "Archive | Sara Duterte",
+  title: () => record.value?.title || "Archive",
 })
 
 function getRecord() {
